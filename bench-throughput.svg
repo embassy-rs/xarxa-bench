@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" width="1120" height="520" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<style>
+
+    :root { color-scheme: light dark; }
+    .surface { fill: #fcfcfb; }
+    .t1 { fill: #0b0b0b; }
+    .t2 { fill: #52514e; }
+    .grid { stroke: #0b0b0b; stroke-opacity: 0.10; stroke-width: 1; }
+    .axis { stroke: #0b0b0b; stroke-opacity: 0.28; stroke-width: 1; }
+    
+.s0 { fill: #2874d8; }
+.s1 { fill: #7eace8; }
+.s2 { fill: #dc4834; }
+.s3 { fill: #ec9a8f; }
+.s4 { fill: #1d8a5c; }
+.s5 { fill: #83c9ac; }
+
+    @media (prefers-color-scheme: dark) {
+      .surface { fill: #1a1a19; }
+      .t1 { fill: #ffffff; }
+      .t2 { fill: #c3c2b7; }
+      .grid { stroke: #ffffff; stroke-opacity: 0.12; }
+      .axis { stroke: #ffffff; stroke-opacity: 0.32; }
+    
+.s0 { fill: #2858d0; }
+.s1 { fill: #7392e0; }
+.s2 { fill: #ac3420; }
+.s3 { fill: #c97b6e; }
+.s4 { fill: #137048; }
+.s5 { fill: #5fa98c; }
+}
+</style>
+<rect width="1120" height="520" class="surface"/>
+<text x="64" y="34" class="t1" font-size="19" font-weight="600">xarxa vs. smoltcp vs. lwIP on a Nucleo-F429ZI</text>
+<text x="64" y="55" class="t2" font-size="13">payload throughput, 180 MHz, 100 Mbit/s link, 4 benchmarks x 3 stacks x 2 IP versions</text>
+<rect x="64" y="69" width="10" height="10" rx="2" class="s0"/>
+<text x="79" y="78" class="t2" font-size="12">xarxa v4</text>
+<rect x="159.6" y="69" width="10" height="10" rx="2" class="s1"/>
+<text x="174.6" y="78" class="t2" font-size="12">xarxa v6</text>
+<rect x="255.2" y="69" width="10" height="10" rx="2" class="s2"/>
+<text x="270.2" y="78" class="t2" font-size="12">smoltcp v4</text>
+<rect x="365.2" y="69" width="10" height="10" rx="2" class="s3"/>
+<text x="380.2" y="78" class="t2" font-size="12">smoltcp v6</text>
+<rect x="475.2" y="69" width="10" height="10" rx="2" class="s4"/>
+<text x="490.2" y="78" class="t2" font-size="12">lwip v4</text>
+<rect x="563.6" y="69" width="10" height="10" rx="2" class="s5"/>
+<text x="578.6" y="78" class="t2" font-size="12">lwip v6</text>
+<line x1="64" y1="444.0" x2="1096" y2="444.0" class="grid"/>
+<text x="54" y="448.0" class="t2" font-size="11" text-anchor="end">0</text>
+<line x1="64" y1="374.4" x2="1096" y2="374.4" class="grid"/>
+<text x="54" y="378.4" class="t2" font-size="11" text-anchor="end">20</text>
+<line x1="64" y1="304.8" x2="1096" y2="304.8" class="grid"/>
+<text x="54" y="308.8" class="t2" font-size="11" text-anchor="end">40</text>
+<line x1="64" y1="235.2" x2="1096" y2="235.2" class="grid"/>
+<text x="54" y="239.2" class="t2" font-size="11" text-anchor="end">60</text>
+<line x1="64" y1="165.6" x2="1096" y2="165.6" class="grid"/>
+<text x="54" y="169.6" class="t2" font-size="11" text-anchor="end">80</text>
+<line x1="64" y1="96.0" x2="1096" y2="96.0" class="grid"/>
+<text x="54" y="100.0" class="t2" font-size="11" text-anchor="end">100</text>
+<line x1="64" y1="444.0" x2="1096" y2="444.0" class="axis"/>
+<text x="18" y="270.0" class="t2" font-size="12" text-anchor="middle" transform="rotate(-90 18 270.0)">Mbit/s</text>
+<path d="M95.0 444.0 v-329.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v329.1 z" class="s0"/>
+<text x="110.3" y="103.9" class="t1" font-size="11" text-anchor="middle">95.7</text>
+<path d="M127.6 444.0 v-324.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v324.6 z" class="s1"/>
+<text x="143.0" y="108.4" class="t1" font-size="11" text-anchor="middle">94.4</text>
+<path d="M160.3 444.0 v-174.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v174.4 z" class="s2"/>
+<text x="175.7" y="258.6" class="t1" font-size="11" text-anchor="middle">51.3</text>
+<path d="M193.0 444.0 v-154.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v154.3 z" class="s3"/>
+<text x="208.3" y="278.7" class="t1" font-size="11" text-anchor="middle">45.5</text>
+<path d="M225.7 444.0 v-329.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v329.1 z" class="s4"/>
+<text x="241.0" y="103.9" class="t1" font-size="11" text-anchor="middle">95.7</text>
+<path d="M258.4 444.0 v-324.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v324.5 z" class="s5"/>
+<text x="273.7" y="108.5" class="t1" font-size="11" text-anchor="middle">94.4</text>
+<text x="193.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-rx</text>
+<path d="M353.0 444.0 v-294.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v294.8 z" class="s0"/>
+<text x="368.3" y="138.2" class="t1" font-size="11" text-anchor="middle">85.8</text>
+<path d="M385.6 444.0 v-271.2 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v271.2 z" class="s1"/>
+<text x="401.0" y="161.8" class="t1" font-size="11" text-anchor="middle">79.1</text>
+<path d="M418.3 444.0 v-225.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v225.7 z" class="s2"/>
+<text x="433.7" y="207.3" class="t1" font-size="11" text-anchor="middle">66.0</text>
+<path d="M451.0 444.0 v-193.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v193.6 z" class="s3"/>
+<text x="466.3" y="239.4" class="t1" font-size="11" text-anchor="middle">56.8</text>
+<path d="M483.7 444.0 v-283.2 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v283.2 z" class="s4"/>
+<text x="499.0" y="149.8" class="t1" font-size="11" text-anchor="middle">82.5</text>
+<path d="M516.4 444.0 v-280.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v280.8 z" class="s5"/>
+<text x="531.7" y="152.2" class="t1" font-size="11" text-anchor="middle">81.8</text>
+<text x="451.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-tx</text>
+<path d="M611.0 444.0 v-232.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v232.6 z" class="s0"/>
+<text x="626.3" y="200.4" class="t1" font-size="11" text-anchor="middle">68.0</text>
+<path d="M643.6 444.0 v-228.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v228.6 z" class="s1"/>
+<text x="659.0" y="204.4" class="t1" font-size="11" text-anchor="middle">66.8</text>
+<path d="M676.3 444.0 v-201.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v201.1 z" class="s2"/>
+<text x="691.7" y="231.9" class="t1" font-size="11" text-anchor="middle">58.9</text>
+<path d="M709.0 444.0 v-194.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v194.4 z" class="s3"/>
+<text x="724.3" y="238.6" class="t1" font-size="11" text-anchor="middle">57.0</text>
+<path d="M741.7 444.0 v-291.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v291.7 z" class="s4"/>
+<text x="757.0" y="141.3" class="t1" font-size="11" text-anchor="middle">85.0</text>
+<path d="M774.4 444.0 v-288.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v288.3 z" class="s5"/>
+<text x="789.7" y="144.7" class="t1" font-size="11" text-anchor="middle">84.0</text>
+<text x="709.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-rx</text>
+<path d="M869.0 444.0 v-203.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v203.6 z" class="s0"/>
+<text x="884.3" y="229.4" class="t1" font-size="11" text-anchor="middle">59.7</text>
+<path d="M901.6 444.0 v-191.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v191.3 z" class="s1"/>
+<text x="917.0" y="241.7" class="t1" font-size="11" text-anchor="middle">56.1</text>
+<path d="M934.3 444.0 v-201.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v201.5 z" class="s2"/>
+<text x="949.7" y="231.5" class="t1" font-size="11" text-anchor="middle">59.0</text>
+<path d="M967.0 444.0 v-181.2 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v181.2 z" class="s3"/>
+<text x="982.3" y="251.8" class="t1" font-size="11" text-anchor="middle">53.2</text>
+<path d="M999.7 444.0 v-239.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v239.8 z" class="s4"/>
+<text x="1015.0" y="193.2" class="t1" font-size="11" text-anchor="middle">70.1</text>
+<path d="M1032.4 444.0 v-239.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v239.1 z" class="s5"/>
+<text x="1047.7" y="193.9" class="t1" font-size="11" text-anchor="middle">69.9</text>
+<text x="967.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-tx</text>
+</svg>

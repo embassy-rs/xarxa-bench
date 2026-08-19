@@ -1,0 +1,22 @@
+[package]
+name = "lwip-sys"
+version = "0.1.0"
+# 2021 rather than the 2024 the rest of the tree uses: bindgen emits plain `extern "C"`
+# blocks and `#[no_mangle]`, both of which 2024 rejects.
+edition = "2021"
+publish = false
+links = "lwip"
+description = "lwIP 2.2.1, built for thumbv7em-none-eabihf, for the xarxa benchmark"
+
+[features]
+# Keep lwIP's LWIP_ASSERT checks, which panic through defmt. Off by default: the
+# benchmark builds without them, to match the Rust stacks' release profile (no
+# debug_assert!, no overflow checks).
+assert = []
+
+[dependencies]
+defmt = "1.0.1"
+
+[build-dependencies]
+bindgen = "0.72.1"
+cc = "1.4.3"

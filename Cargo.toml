@@ -1,0 +1,127 @@
+[package]
+name = "xarxa-example-stm32f429zi"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Standalone: deliberately not a member of any workspace.
+[workspace]
+
+# Three axes, exactly one feature from each. There are no defaults, because there is
+# nothing sensible to run without a choice on all three.
+[features]
+## the stack under test — only the selected one is compiled at all
+stack-xarxa = ["dep:xarxa"]
+stack-smoltcp = ["dep:smoltcp"]
+stack-lwip = ["dep:lwip-sys"]
+
+## board -> server, TCP (perf-server's "upload", port 4322)
+bench-tcp-tx = []
+## server -> board, TCP (perf-server's "download", port 4321)
+bench-tcp-rx = []
+## board -> server, UDP (perf-server's "udp upload", port 4325)
+bench-udp-tx = []
+## server -> board, UDP (perf-server's "udp download", port 4324)
+bench-udp-rx = []
+
+## Which IP version the benchmark's traffic runs over. This selects the *server address*
+## the benchmark talks to and the header sizes derived from it — not what the stacks are
+## built with: both stacks are compiled with IPv4 and IPv6 support either way, and the
+## board configures an address of each family either way, so the two builds differ only
+## in the traffic they generate.
+ipv4 = []
+ipv6 = []
+
+[dependencies]
+xarxa = { path = "..", default-features = false, optional = true, features = [
+    "defmt",
+    "medium-ethernet",
+    "medium-ip",
+    "proto-ipv4",
+    "proto-ipv6",
+    "socket-raw",
+    "socket-udp",
+    "socket-tcp",
+    # Reno only: lwIP's TCP is RFC 5681 (slow start, congestion avoidance, fast
+    # retransmit and fast recovery) and has no CUBIC, so compiling CUBIC into the
+    # other two would be code size neither of them can use here.
+    "socket-tcp-reno",
+    # lwIP answers pings (LWIP_ICMP=1) and so does smoltcp here, so xarxa does too.
+    "auto-icmp-echo-reply",
+    # `icmp-error-handling` is deliberately *off*: reporting an incoming ICMP error to
+    # the socket that provoked it is a capability neither lwIP nor smoltcp has, so
+    # compiling it in would put code in one bar of the chart that the other two have no
+    # counterpart for.
+] }
+
+# Cut down to the protocols xarxa actually implements, so the comparison is between two
+# stacks doing the same job:
+#
+#  * in:  ethernet + IP media, IPv4, IPv6, UDP/TCP/raw sockets, the stack answering
+#         pings itself, Reno congestion control (what lwIP's TCP implements, and
+#         what all three are set to at runtime), a 4-segment TCP assembler.
+#  * out: DHCP, DNS/mDNS, ICMP sockets, IPv4/IPv6/6LoWPAN fragmentation, 6LoWPAN and
+#         802.15.4, RPL, IPsec, SLAAC, IPv6 hop-by-hop/routing headers, IGMP/MLD group
+#         management, packet metadata IDs, and the async/waker plumbing — xarxa has
+#         none of those (§10 of DESIGN.md lists most of them as later features).
+#
+# Everything not named here is left at smoltcp's default, which for the sizing knobs
+# already matches what this example uses (2 addresses, 2 routes, 8 neighbor entries).
+smoltcp = { version = "0.13", default-features = false, optional = true, features = [
+    "alloc",
+    "defmt",
+    "medium-ethernet",
+    "medium-ip",
+    "proto-ipv4",
+    "proto-ipv6",
+    "socket-raw",
+    "socket-udp",
+    "socket-tcp",
+    "socket-tcp-reno",
+    "auto-icmp-echo-reply",
+    "assembler-max-segment-count-4",
+] }
+
+# lwIP 2.2.1, vendored and compiled from source. The same cutting-down applies as to
+# smoltcp above, but it is expressed in C: see `lwip-sys/port/lwipopts.h`, which turns
+# off DHCP, DNS, autoip, IGMP/MLD, SLAAC, fragmentation, reassembly and the netconn and
+# socket APIs, and sets the buffer sizes to the ones in `src/bench.rs`.
+lwip-sys = { path = "lwip-sys", optional = true }
+
+embassy-stm32 = { path = "../../embassy/embassy-stm32", features = [
+    "defmt",
+    "stm32f429zi",
+    "unstable-pac",
+    "memory-x",
+    "time",
+    "time-driver-tim2",
+] }
+embassy-time = { path = "../../embassy/embassy-time", features = [
+    "defmt",
+    "defmt-timestamp-uptime",
+    "tick-hz-1_000_000",
+] }
+
+cortex-m = { version = "0.7.6", features = ["inline-asm", "critical-section-single-core"] }
+cortex-m-rt = "0.7.0"
+critical-section = "1.1"
+embedded-alloc = "0.7"
+vcell = "0.1"
+
+teleprobe-meta = "1.1"
+
+defmt = "1.0.1"
+defmt-rtt = "1.0.0"
+# Deliberately without `print-defmt`. Formatting a `PanicInfo` drags `core::fmt` in,
+# and with it every panic site's message and `Location` — absolute source paths and
+# all — which is several KiB of flash that exists only to print something no
+# benchmark run ever prints. lwIP, being C, has no equivalent, so leaving it on
+# would put a Rust-only tax on two of the three bars in the code-size chart.
+panic-probe = "1.0.0"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+lto = "fat"
+opt-level = "s"
+overflow-checks = false
