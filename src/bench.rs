@@ -33,20 +33,21 @@
 //!
 //! Everything below the socket API is shared: one ethernet driver ([`crate::eth`]), the
 //! same ring depths, the same MAC configuration, software checksums on both sides, and
-//! the same spin-on-poll loop shape. What differs is what each stack's own design makes
-//! differ — see the module docs of [`crate::eth`] for the buffer ownership split, and
+//! the same spin-on-poll loop shape. None of the three has an allocator: every buffer any
+//! of them uses is a static, sized by the constants below. What differs is what each
+//! stack's own design makes differ — see the module docs of [`crate::eth`] for the buffer ownership split, and
 //! the feature list in `Cargo.toml` for how smoltcp is cut down to the protocols xarxa
 //! actually implements.
 //!
 //! Sizes are matched where both stacks have the same knob:
 //!
 //!  * TCP: [`TCP_BUF`] in the measured direction, [`TCP_BUF_IDLE`] in the other;
-//!  * UDP: a [`UDP_RX_PACKETS`]-deep receive queue on smoltcp and lwIP; xarxa's UDP
-//!    receive queue is unbounded, and the benchmark drains it on every poll;
+//!  * UDP: a [`UDP_RX_PACKETS`]-deep receive queue on xarxa and smoltcp (lwIP has no
+//!    receive queue at all — see `bench_lwip.rs`);
 //!  * [`IO_CHUNK`] bytes per socket call, [`UDP_PAYLOAD`]-byte datagrams;
 //!  * Reno congestion control, which is the one lwIP has; smoltcp defaults to none and
 //!    is set to Reno at runtime, xarxa selects it at compile time with its
-//!    `socket-tcp-reno` feature.
+//!    `tcp-reno` feature.
 
 // This module is the shared config table plus the meter: with one benchmark built at a
 // time, roughly half of the table is unused in any given build, by construction.
@@ -123,6 +124,19 @@ pub const TCP_BUF: usize = 32 * 1024;
 /// The other direction carries nothing but ACKs.
 pub const TCP_BUF_IDLE: usize = 4 * 1024;
 
+/// The two capacities above, sorted into receive and transmit by the benchmark that is
+/// built. Both stacks declare their ring buffers as statics of exactly these sizes.
+pub const TCP_RX_CAP: usize = if cfg!(feature = "bench-tcp-rx") {
+    TCP_BUF
+} else {
+    TCP_BUF_IDLE
+};
+pub const TCP_TX_CAP: usize = if cfg!(feature = "bench-tcp-tx") {
+    TCP_BUF
+} else {
+    TCP_BUF_IDLE
+};
+
 /// The selected family's IP header size — 20 bytes for IPv4, 40 for IPv6. Everything
 /// derived from the MTU below goes through this, so an `ipv6` run carries 20 bytes less
 /// payload per frame than an `ipv4` one, exactly as it does on the wire.
@@ -150,9 +164,14 @@ pub const IO_CHUNK: usize = 2048;
 /// A full-MTU UDP payload: 1500 - the IP header - 8 (UDP), i.e. 1472 over IPv4 and 1452
 /// over IPv6.
 pub const UDP_PAYLOAD: usize = 1500 - IP_HEADER - 8;
-/// Datagrams a UDP socket can hold before it starts dropping: as deep as the RX ring, so
-/// that a poll which picks up a full ring never overflows the socket either.
-pub const UDP_RX_PACKETS: usize = ETH_RX;
+/// Datagrams a UDP socket can hold before it starts dropping.
+///
+/// Deeper than the RX ring, so that a poll which picks up a full ring never overflows the
+/// socket either, and a power of two because xarxa's depth is a cargo feature
+/// (`udp-rx-queue-count-N`) that only takes those past 8 — this is the one number that
+/// has to be spelled identically in `Cargo.toml` and here.
+pub const UDP_RX_PACKETS: usize = 32;
+const _: () = assert!(UDP_RX_PACKETS >= ETH_RX);
 
 /// Datagrams smoltcp's UDP socket can hold on the way out. xarxa has no transmit queue
 /// at all — its `send_slice` builds the frame and hands it to the device then and there —

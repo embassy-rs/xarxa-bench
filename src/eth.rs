@@ -6,11 +6,12 @@
 //! difference. What is *not* identical is how each stack wants to own frame memory, and
 //! that is the design difference the benchmark is about:
 //!
-//!  * [`xarxa::iface::Interface`] moves **owned buffers**. On receive the driver hands
+//!  * [`xarxa::driver::Driver`] moves **owned buffers**. On receive the driver hands
 //!    the stack the very buffer the DMA filled and refills the descriptor with a freshly
 //!    allocated one; on transmit the descriptor points at the payload of the buffer the
 //!    stack handed down, which the driver owns until the hardware is done and then drops
-//!    (dropping is what frees it). Zero memcpys, one allocation per frame per direction.
+//!    (dropping is what frees it). Zero memcpys, one pool slot taken and given back per
+//!    frame per direction.
 //!  * [`smoltcp::phy::Device`] hands out **borrows** via tokens. The slot's buffer stays
 //!    put: RX borrows it in place and re-arms the descriptor with it, TX writes into it
 //!    and sends it. Zero memcpys and zero allocations — smoltcp pays its copies one
@@ -53,12 +54,13 @@ pub const MTU: usize = 1514;
 /// What a descriptor points at, on the xarxa side.
 ///
 /// This is xarxa's own `PacketBuf`, because that is the whole point: the buffer the DMA
-/// fills is the buffer the stack owns, so it is heap-allocated and moves. The other two
+/// fills is the buffer the stack owns, so it comes from xarxa's static packet pool and
+/// moves. The other two
 /// stacks need no owned type: smoltcp borrows through tokens and lwIP refcounts pbufs
 /// over [`Rings`]' static frame storage, which is what a normal application of either
 /// does.
 #[cfg(feature = "stack-xarxa")]
-type Frame = xarxa::PacketBuf;
+type Frame = xarxa::driver::PacketBuf;
 
 /// Whether the PHY last reported the link up.
 ///
@@ -67,9 +69,11 @@ pub static LINK_UP: AtomicBool = AtomicBool::new(false);
 
 /// Frame counters, for the benchmarks.
 ///
-/// `TX_FULL` is the one that matters: it counts frames the device had no room for, which
-/// both stacks handle by not sending them. A TX benchmark's offered and achieved rates
-/// differ by exactly that count.
+/// `TX_FULL` is the one that matters: it counts the times the device had no room for a
+/// frame. smoltcp and lwIP handle that by dropping the frame, so for them a TX
+/// benchmark's offered and achieved rates differ by exactly that count. xarxa asks
+/// before building (`can_transmit`) and holds the packet back instead, so for it the
+/// count is how often the link pushed back, and nothing was dropped.
 pub mod stats {
     use super::AtomicU32;
 
@@ -77,6 +81,8 @@ pub mod stats {
     pub static RX_BAD: AtomicU32 = AtomicU32::new(0);
     pub static TX_FRAMES: AtomicU32 = AtomicU32::new(0);
     pub static TX_FULL: AtomicU32 = AtomicU32::new(0);
+    /// Frames dropped on receive because the packet pool was empty (xarxa only).
+    pub static RX_NOBUF: AtomicU32 = AtomicU32::new(0);
 }
 
 /// Storage for one frame, in [`Rings`].
@@ -447,9 +453,8 @@ impl<const TX: usize, const RX: usize> Rings<TX, RX> {
 
 struct RxRing<const N: usize> {
     desc: &'static mut [RDes; N],
-    /// Where the DMA receives into. Owned, heap-allocated buffers that get handed to the
-    /// stack and replaced (xarxa), or static storage that is borrowed and reused
-    /// (smoltcp, lwIP).
+    /// Where the DMA receives into. Owned pool buffers that get handed to the stack and
+    /// replaced (xarxa), or static storage that is borrowed and reused (smoltcp, lwIP).
     #[cfg(feature = "stack-xarxa")]
     bufs: [Option<Frame>; N],
     #[cfg(any(feature = "stack-smoltcp", feature = "stack-lwip"))]
@@ -489,7 +494,7 @@ impl<const N: usize> RxRing<N> {
         for i in 0..N {
             #[cfg(feature = "stack-xarxa")]
             {
-                this.bufs[i] = Some(Frame::new());
+                this.bufs[i] = Some(Frame::try_new().expect("packet pool too small for the RX ring"));
             }
             // Chain each descriptor to the next; the last one wraps via the ring bit.
             let next: Option<*const RDes> = (i + 1 < N).then(|| &this.desc[i + 1] as *const RDes);
@@ -587,10 +592,16 @@ impl<const N: usize> RxRing<N> {
     /// Take the frame at the head of the ring, replacing it with a fresh buffer so the
     /// descriptor still has somewhere to receive into. This is the owned-buffer path.
     #[cfg(feature = "stack-xarxa")]
-    fn take(&mut self, len: usize) -> Frame {
+    fn take(&mut self, len: usize) -> Option<Frame> {
+        let Some(mut fresh) = Frame::try_new() else {
+            // Pool empty: the frame is dropped and the slot keeps the buffer it has,
+            // which is what a driver does when it has nowhere to put a frame.
+            stats::RX_NOBUF.fetch_add(1, Ordering::Relaxed);
+            self.recycle();
+            return None;
+        };
         let i = self.index;
         let mut buf = self.bufs[i].take().unwrap();
-        let mut fresh = Frame::new();
         self.desc[i].set_ready(fresh.storage_mut());
         self.bufs[i] = Some(fresh);
         self.index = (i + 1) % N;
@@ -598,7 +609,7 @@ impl<const N: usize> RxRing<N> {
 
         // The DMA wrote the frame at offset 0, so there is no headroom to skip.
         buf.set_len(len);
-        buf
+        Some(buf)
     }
 
     /// Wrap the frame at the head of the ring in a custom pbuf and advance.
@@ -840,8 +851,9 @@ pub struct Ethernet<const TX: usize, const RX: usize> {
     rx: RxRing<RX>,
     tx: TxRing<TX>,
 
-    /// Only lwIP asks the driver for it, in the netif init callback.
-    #[cfg(feature = "stack-lwip")]
+    /// lwIP asks the driver for it in the netif init callback, xarxa through
+    /// `Driver::hardware_address`. smoltcp takes it out of band.
+    #[cfg(any(feature = "stack-lwip", feature = "stack-xarxa"))]
     mac_addr: [u8; 6],
     phy_addr: u8,
     link_up: bool,
@@ -986,7 +998,7 @@ impl<const TX: usize, const RX: usize> Ethernet<TX, RX> {
             _pins: pins,
             rx,
             tx,
-            #[cfg(feature = "stack-lwip")]
+            #[cfg(any(feature = "stack-lwip", feature = "stack-xarxa"))]
             mac_addr,
             phy_addr: 0,
             link_up: false,
@@ -1121,25 +1133,48 @@ impl<const TX: usize, const RX: usize> Drop for Ethernet<TX, RX> {
 // ---------------------------------------------------------------------------
 
 #[cfg(feature = "stack-xarxa")]
-impl<const TX: usize, const RX: usize> xarxa::iface::Interface for Ethernet<TX, RX> {
-    fn capabilities(&self) -> xarxa::iface::IfaceCapabilities {
-        let mut caps = xarxa::iface::IfaceCapabilities::default();
-        caps.medium = xarxa::iface::Medium::Ethernet;
+impl<const TX: usize, const RX: usize> xarxa::driver::Driver for Ethernet<TX, RX> {
+    fn capabilities(&self) -> xarxa::driver::Capabilities {
+        let mut caps = xarxa::driver::Capabilities::default();
+        caps.medium = xarxa::driver::Medium::Ethernet;
         caps.max_transmission_unit = MTU;
         caps
     }
 
-    fn receive(&mut self) -> Option<xarxa::PacketBuf> {
-        self.poll_link();
-        let len = self.rx.peek()?;
-        Some(self.rx.take(len))
+    fn hardware_address(&self) -> xarxa::driver::HardwareAddress {
+        xarxa::driver::HardwareAddress::Ethernet(self.mac_addr)
     }
 
-    fn transmit(&mut self, buf: xarxa::PacketBuf) -> Result<(), xarxa::PacketBuf> {
-        if !self.tx.available() {
-            // Ring full: the hardware still owns this descriptor. The stack drops the
-            // frame, so count it.
+    fn link_state(&mut self) -> xarxa::driver::LinkState {
+        self.poll_link();
+        if self.link_up {
+            xarxa::driver::LinkState::Up
+        } else {
+            xarxa::driver::LinkState::Down
+        }
+    }
+
+    fn receive(&mut self) -> Option<xarxa::driver::PacketBuf> {
+        self.poll_link();
+        let len = self.rx.peek()?;
+        self.rx.take(len)
+    }
+
+    fn can_transmit(&mut self) -> bool {
+        // Ring full: the hardware still owns the next descriptor. The stack holds its
+        // packet back (sockets report `DeviceBusy`, TCP keeps the segment) and asks
+        // again on the next poll. Counted for the stats line, nothing is dropped.
+        let available = self.tx.available();
+        if !available {
             stats::TX_FULL.fetch_add(1, Ordering::Relaxed);
+        }
+        available
+    }
+
+    fn transmit(&mut self, buf: xarxa::driver::PacketBuf) -> Result<(), xarxa::driver::PacketBuf> {
+        if !self.tx.available() {
+            // Cannot happen after `can_transmit`, which the stack asks first: a frame
+            // the stack sends without asking (a reply, a solicitation) is best-effort.
             return Err(buf);
         }
         if buf.len() > MTU {

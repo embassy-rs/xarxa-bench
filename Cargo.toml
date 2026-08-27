@@ -35,20 +35,42 @@ ipv6 = []
 [dependencies]
 xarxa = { path = "..", default-features = false, optional = true, features = [
     "defmt",
+    # No `alloc`: there is no allocator in this firmware at all, on any of the three
+    # stacks. Frames come from xarxa's static packet pool (DESIGN.md §3), sized to hold
+    # a whole window in each direction (2 x ETH_RING) with room to spare, and everything
+    # else the stack keeps is bounded by the knobs below. The TCP ring buffers and the
+    # ethernet driver are lent to the stack as `&'static mut` (DESIGN.md §3 "Lent
+    # storage") from statics in `bench_xarxa.rs` and `main.rs`.
+    "packet-buf-count-64",
+    # Sized like smoltcp's own defaults, which is what the smoltcp build below gets:
+    # 2 routes and 8 neighbor entries. Addresses are 3 rather than 2 because xarxa
+    # configures an IPv6 link-local address of its own when the interface is added,
+    # on top of the IPv4 and IPv6 addresses the benchmark assigns.
+    "iface-count-1",
+    "iface-addr-count-3",
+    "route-count-2",
+    "neighbor-cache-count-8",
+    # One socket of each kind, which is all any benchmark opens.
+    "udp-socket-count-1",
+    "raw-socket-count-1",
+    "tcp-socket-count-1",
+    # The UDP receive queue, the one buffer count the three stacks share: `UDP_RX_PACKETS`
+    # in `src/bench.rs`. Keep the two in step.
+    "udp-rx-queue-count-32",
     "medium-ethernet",
     "medium-ip",
-    "proto-ipv4",
-    "proto-ipv6",
-    "socket-raw",
-    "socket-udp",
-    "socket-tcp",
+    "ipv4",
+    "ipv6",
+    "raw",
+    "udp",
+    "tcp",
     # Reno only: lwIP's TCP is RFC 5681 (slow start, congestion avoidance, fast
     # retransmit and fast recovery) and has no CUBIC, so compiling CUBIC into the
     # other two would be code size neither of them can use here.
-    "socket-tcp-reno",
+    "tcp-reno",
     # lwIP answers pings (LWIP_ICMP=1) and so does smoltcp here, so xarxa does too.
-    "auto-icmp-echo-reply",
-    # `icmp-error-handling` is deliberately *off*: reporting an incoming ICMP error to
+    "icmp-ping-reply",
+    # `icmp-errors` is deliberately *off*: reporting an incoming ICMP error to
     # the socket that provoked it is a capability neither lwIP nor smoltcp has, so
     # compiling it in would put code in one bar of the chart that the other two have no
     # counterpart for.
@@ -67,8 +89,9 @@ xarxa = { path = "..", default-features = false, optional = true, features = [
 #
 # Everything not named here is left at smoltcp's default, which for the sizing knobs
 # already matches what this example uses (2 addresses, 2 routes, 8 neighbor entries).
+# `alloc` is deliberately off, like xarxa's: smoltcp's socket set and socket buffers are
+# statics in `bench_smoltcp.rs`, so this firmware has no allocator either.
 smoltcp = { version = "0.13", default-features = false, optional = true, features = [
-    "alloc",
     "defmt",
     "medium-ethernet",
     "medium-ip",
@@ -105,7 +128,6 @@ embassy-time = { path = "../../embassy/embassy-time", features = [
 cortex-m = { version = "0.7.6", features = ["inline-asm", "critical-section-single-core"] }
 cortex-m-rt = "0.7.0"
 critical-section = "1.1"
-embedded-alloc = "0.7"
 vcell = "0.1"
 
 teleprobe-meta = "1.1"

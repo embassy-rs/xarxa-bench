@@ -8,10 +8,14 @@ I've ensured the benchmark is as apples-to-apples as possible:
 
 - Same HAL (embassy-stm32), same(-ish) ETH driver, same RCC config.
 - Same set of features enabled in all 3 stacks (IPv4, IPv6, TCP, UDP all at once)
-- Same buffer sizes, large enough that there is no drops.
-- xarxa `tcp-socket-timestamps` disabled, also disabled in the other stacks
-- xarxa `icmp-error-handling` disabled, since smoltcp doesn't have it.
-- `auto-icmp-echo-reply` enabled
+- Same buffer sizes, large enough that there is no drops. Same UDP receive queue depth
+  (32 datagrams) on xarxa and smoltcp; lwIP has no receive queue at all.
+- No allocator in any of the three builds. Every buffer is a static: xarxa's packet pool,
+  smoltcp's device rings and socket buffers, lwIP's `MEM_SIZE` heap and rings. xarxa is
+  built without its `alloc` feature and smoltcp without its own.
+- xarxa `tcp-timestamps` disabled, also disabled in the other stacks
+- xarxa `icmp-errors` disabled, since smoltcp doesn't have it.
+- `icmp-ping-reply` enabled
 
 There is a few things that aren't apples-to-apples:
 

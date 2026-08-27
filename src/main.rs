@@ -1,8 +1,8 @@
 //! Network stack throughput benchmarks on a Nucleo-F429ZI.
 //!
-//! `main` brings up the clocks, the heap and the ethernet driver, and then hands the
-//! device to [`bench`], which builds the stack the cargo features asked for and runs the
-//! benchmark the cargo features asked for. Two axes, one feature each, no defaults:
+//! `main` brings up the clocks and the ethernet driver, and then hands the device to
+//! [`bench`], which builds the stack the cargo features asked for and runs the benchmark
+//! the cargo features asked for. Two axes, one feature each, no defaults:
 //!
 //! ```sh
 //! cargo run --release --features stack-xarxa,bench-tcp-rx
@@ -13,23 +13,19 @@
 //! its `deploy.sh`) on the machine at the other end of the cable.
 //!
 //! There is no async and no executor — this is a plain `cortex-m-rt` entry point that
-//! spins on the stack's poll function, for either stack.
+//! spins on the stack's poll function, for either stack. There is no allocator either:
+//! see [`MEMORY`] below.
 
 #![no_std]
 #![no_main]
 
-extern crate alloc;
-
 mod bench;
 mod eth;
-
-use core::mem::MaybeUninit;
 
 use defmt::info;
 use defmt_rtt as _;
 use embassy_stm32::time::Hertz;
 use embassy_time::Duration;
-use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 
 use crate::bench::{ETH_RX, ETH_TX};
@@ -41,30 +37,25 @@ use crate::bench::{ETH_RX, ETH_TX};
 teleprobe_meta::target!(b"nucleo-stm32f429zi");
 teleprobe_meta::timeout!(60);
 
-/// The F429ZI has 192 KB of DMA-reachable SRAM. The three stacks divide it differently,
-/// and each gets enough that it can never drop a packet for want of memory:
+/// The F429ZI has 192 KB of DMA-reachable SRAM. None of the three builds has an
+/// allocator: every buffer is a static, and each stack divides the SRAM its own way.
 ///
-///  * **xarxa** owns its buffers, so *everything* on the packet path is here: the RX
-///    ring's buffers, every frame in flight on TX, the socket buffers, and the queued
-///    datagrams. A whole window in each direction is 2 x 24 x ~1.5 KB = 73 KB, plus at
-///    most 36 KB of socket buffers, so 128 KB leaves room to spare.
+///  * **xarxa** owns its buffers, and they live in its static packet pool (64 x ~1.5 KB
+///    = 97 KB of `.bss`, `packet-buf-count-64` in Cargo.toml): the RX ring's buffers,
+///    every frame in flight on TX, and the queued datagrams. A whole window in each
+///    direction is 2 x 24 = 48 of them, so 64 leaves room to spare. On top of that, a
+///    TCP benchmark lends the stack its two ring buffers (36 KB, `bench_xarxa.rs`).
 ///  * **smoltcp** borrows, so its frame buffers are static (`RINGS`, ~73 KB of `.bss`)
-///    and the heap only carries socket buffers — at most ~47 KB, for the UDP queues.
+///    and its socket buffers are statics of their own — 36 KB for TCP, ~59 KB for the
+///    UDP queues (`bench_smoltcp.rs`).
 ///  * **lwIP** has its own heap (`MEM_SIZE`, 64 KB of `.bss`) which every outgoing
-///    packet comes out of, and receives into the ring's own static buffers (~36 KB), so
-///    the Rust heap here is unused — nothing on the lwIP path allocates through it.
+///    packet comes out of, and receives into the ring's own static buffers (~36 KB).
 ///
 /// Either way the total memory devoted to networking is about the same; what differs is
 /// which side of the socket API it sits on.
-#[cfg(feature = "stack-xarxa")]
-const HEAP_SIZE: usize = 128 * 1024;
-#[cfg(feature = "stack-smoltcp")]
-const HEAP_SIZE: usize = 64 * 1024;
-#[cfg(feature = "stack-lwip")]
-const HEAP_SIZE: usize = 1024;
-
-#[global_allocator]
-static HEAP: Heap = Heap::empty();
+///
+/// (This item exists to hang the documentation on; nothing reads it.)
+pub const MEMORY: () = ();
 
 /// Locally administered MAC address (the `0x02` sets the "locally administered" bit).
 pub const MAC_ADDR: [u8; 6] = [0x02, 0x00, 0x00, 0xde, 0xad, 0x01];
@@ -88,13 +79,6 @@ pub const IPV6_PREFIX_LEN: u8 = 64;
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
-    {
-        static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
-        // SAFETY: called exactly once, before any allocation, and `HEAP_MEM` is not
-        // referenced anywhere else.
-        unsafe { HEAP.init(&raw mut HEAP_MEM as usize, HEAP_SIZE) }
-    }
-
     let p = embassy_stm32::init(rcc_config());
     info!("xarxa/smoltcp benchmarks on nucleo-stm32f429zi");
 

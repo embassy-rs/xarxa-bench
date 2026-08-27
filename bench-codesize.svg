@@ -55,56 +55,56 @@
 <text x="54" y="100.0" class="t2" font-size="11" text-anchor="end">60</text>
 <line x1="64" y1="444.0" x2="1096" y2="444.0" class="axis"/>
 <text x="18" y="270.0" class="t2" font-size="12" text-anchor="middle" transform="rotate(-90 18 270.0)">KiB</text>
-<path d="M95.0 444.0 v-258.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v258.6 z" class="s0"/>
-<text x="110.3" y="174.4" class="t1" font-size="11" text-anchor="middle">45.3</text>
-<path d="M127.6 444.0 v-260.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v260.4 z" class="s1"/>
-<text x="143.0" y="172.6" class="t1" font-size="11" text-anchor="middle">45.6</text>
-<path d="M160.3 444.0 v-288.9 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v288.9 z" class="s2"/>
-<text x="175.7" y="144.1" class="t1" font-size="11" text-anchor="middle">50.5</text>
-<path d="M193.0 444.0 v-290.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.8 z" class="s3"/>
-<text x="208.3" y="142.2" class="t1" font-size="11" text-anchor="middle">50.8</text>
-<path d="M225.7 444.0 v-237.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.7 z" class="s4"/>
-<text x="241.0" y="195.3" class="t1" font-size="11" text-anchor="middle">41.7</text>
-<path d="M258.4 444.0 v-237.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.8 z" class="s5"/>
-<text x="273.7" y="195.2" class="t1" font-size="11" text-anchor="middle">41.7</text>
+<path d="M95.0 444.0 v-234.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v234.4 z" class="s0"/>
+<text x="110.3" y="198.6" class="t1" font-size="11" text-anchor="middle">41.1</text>
+<path d="M127.6 444.0 v-236.2 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.2 z" class="s1"/>
+<text x="143.0" y="196.8" class="t1" font-size="11" text-anchor="middle">41.4</text>
+<path d="M160.3 444.0 v-290.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.8 z" class="s2"/>
+<text x="175.7" y="142.2" class="t1" font-size="11" text-anchor="middle">50.8</text>
+<path d="M193.0 444.0 v-292.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v292.7 z" class="s3"/>
+<text x="208.3" y="140.3" class="t1" font-size="11" text-anchor="middle">51.2</text>
+<path d="M225.7 444.0 v-237.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.0 z" class="s4"/>
+<text x="241.0" y="196.0" class="t1" font-size="11" text-anchor="middle">41.6</text>
+<path d="M258.4 444.0 v-237.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.1 z" class="s5"/>
+<text x="273.7" y="195.9" class="t1" font-size="11" text-anchor="middle">41.6</text>
 <text x="193.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-rx</text>
-<path d="M353.0 444.0 v-257.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v257.5 z" class="s0"/>
-<text x="368.3" y="175.5" class="t1" font-size="11" text-anchor="middle">45.1</text>
-<path d="M385.6 444.0 v-259.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v259.1 z" class="s1"/>
-<text x="401.0" y="173.9" class="t1" font-size="11" text-anchor="middle">45.4</text>
-<path d="M418.3 444.0 v-287.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v287.7 z" class="s2"/>
-<text x="433.7" y="145.3" class="t1" font-size="11" text-anchor="middle">50.3</text>
-<path d="M451.0 444.0 v-289.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v289.7 z" class="s3"/>
-<text x="466.3" y="143.3" class="t1" font-size="11" text-anchor="middle">50.6</text>
-<path d="M483.7 444.0 v-237.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.7 z" class="s4"/>
-<text x="499.0" y="195.3" class="t1" font-size="11" text-anchor="middle">41.7</text>
-<path d="M516.4 444.0 v-238.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v238.1 z" class="s5"/>
-<text x="531.7" y="194.9" class="t1" font-size="11" text-anchor="middle">41.7</text>
+<path d="M353.0 444.0 v-234.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v234.1 z" class="s0"/>
+<text x="368.3" y="198.9" class="t1" font-size="11" text-anchor="middle">41.1</text>
+<path d="M385.6 444.0 v-236.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.0 z" class="s1"/>
+<text x="401.0" y="197.0" class="t1" font-size="11" text-anchor="middle">41.4</text>
+<path d="M418.3 444.0 v-290.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.6 z" class="s2"/>
+<text x="433.7" y="142.4" class="t1" font-size="11" text-anchor="middle">50.8</text>
+<path d="M451.0 444.0 v-292.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v292.6 z" class="s3"/>
+<text x="466.3" y="140.4" class="t1" font-size="11" text-anchor="middle">51.1</text>
+<path d="M483.7 444.0 v-236.9 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.9 z" class="s4"/>
+<text x="499.0" y="196.1" class="t1" font-size="11" text-anchor="middle">41.5</text>
+<path d="M516.4 444.0 v-237.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.3 z" class="s5"/>
+<text x="531.7" y="195.7" class="t1" font-size="11" text-anchor="middle">41.6</text>
 <text x="451.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-tx</text>
-<path d="M611.0 444.0 v-257.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v257.8 z" class="s0"/>
-<text x="626.3" y="175.2" class="t1" font-size="11" text-anchor="middle">45.1</text>
-<path d="M643.6 444.0 v-260.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v260.4 z" class="s1"/>
-<text x="659.0" y="172.6" class="t1" font-size="11" text-anchor="middle">45.6</text>
-<path d="M676.3 444.0 v-290.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.5 z" class="s2"/>
-<text x="691.7" y="142.5" class="t1" font-size="11" text-anchor="middle">50.8</text>
-<path d="M709.0 444.0 v-292.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v292.4 z" class="s3"/>
-<text x="724.3" y="140.6" class="t1" font-size="11" text-anchor="middle">51.1</text>
-<path d="M741.7 444.0 v-238.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v238.4 z" class="s4"/>
-<text x="757.0" y="194.6" class="t1" font-size="11" text-anchor="middle">41.8</text>
-<path d="M774.4 444.0 v-238.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v238.7 z" class="s5"/>
-<text x="789.7" y="194.3" class="t1" font-size="11" text-anchor="middle">41.8</text>
+<path d="M611.0 444.0 v-232.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v232.0 z" class="s0"/>
+<text x="626.3" y="201.0" class="t1" font-size="11" text-anchor="middle">40.7</text>
+<path d="M643.6 444.0 v-233.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v233.7 z" class="s1"/>
+<text x="659.0" y="199.3" class="t1" font-size="11" text-anchor="middle">41.0</text>
+<path d="M676.3 444.0 v-282.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v282.5 z" class="s2"/>
+<text x="691.7" y="150.5" class="t1" font-size="11" text-anchor="middle">49.4</text>
+<path d="M709.0 444.0 v-284.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v284.5 z" class="s3"/>
+<text x="724.3" y="148.5" class="t1" font-size="11" text-anchor="middle">49.7</text>
+<path d="M741.7 444.0 v-237.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.7 z" class="s4"/>
+<text x="757.0" y="195.3" class="t1" font-size="11" text-anchor="middle">41.7</text>
+<path d="M774.4 444.0 v-238.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v238.0 z" class="s5"/>
+<text x="789.7" y="195.0" class="t1" font-size="11" text-anchor="middle">41.7</text>
 <text x="709.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-rx</text>
-<path d="M869.0 444.0 v-259.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v259.8 z" class="s0"/>
-<text x="884.3" y="173.2" class="t1" font-size="11" text-anchor="middle">45.5</text>
-<path d="M901.6 444.0 v-262.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v262.1 z" class="s1"/>
-<text x="917.0" y="170.9" class="t1" font-size="11" text-anchor="middle">45.9</text>
-<path d="M934.3 444.0 v-293.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v293.0 z" class="s2"/>
-<text x="949.7" y="140.0" class="t1" font-size="11" text-anchor="middle">51.2</text>
-<path d="M967.0 444.0 v-294.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v294.8 z" class="s3"/>
-<text x="982.3" y="138.2" class="t1" font-size="11" text-anchor="middle">51.5</text>
-<path d="M999.7 444.0 v-246.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v246.0 z" class="s4"/>
-<text x="1015.0" y="187.0" class="t1" font-size="11" text-anchor="middle">43.1</text>
-<path d="M1032.4 444.0 v-246.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v246.4 z" class="s5"/>
-<text x="1047.7" y="186.6" class="t1" font-size="11" text-anchor="middle">43.2</text>
+<path d="M869.0 444.0 v-233.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v233.8 z" class="s0"/>
+<text x="884.3" y="199.2" class="t1" font-size="11" text-anchor="middle">41.0</text>
+<path d="M901.6 444.0 v-235.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v235.7 z" class="s1"/>
+<text x="917.0" y="197.3" class="t1" font-size="11" text-anchor="middle">41.3</text>
+<path d="M934.3 444.0 v-284.9 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v284.9 z" class="s2"/>
+<text x="949.7" y="148.1" class="t1" font-size="11" text-anchor="middle">49.8</text>
+<path d="M967.0 444.0 v-286.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v286.8 z" class="s3"/>
+<text x="982.3" y="146.2" class="t1" font-size="11" text-anchor="middle">50.1</text>
+<path d="M999.7 444.0 v-245.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v245.3 z" class="s4"/>
+<text x="1015.0" y="187.7" class="t1" font-size="11" text-anchor="middle">43.0</text>
+<path d="M1032.4 444.0 v-245.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v245.7 z" class="s5"/>
+<text x="1047.7" y="187.3" class="t1" font-size="11" text-anchor="middle">43.1</text>
 <text x="967.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-tx</text>
 </svg>

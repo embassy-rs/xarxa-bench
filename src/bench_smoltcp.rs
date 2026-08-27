@@ -2,12 +2,12 @@
 //!
 //! Structurally identical to `bench_xarxa.rs` — same loop shape, same buffer sizes, same
 //! chunk sizes — so that what differs between the two runs is the stack.
-
-use alloc::vec;
-use alloc::vec::Vec;
+//!
+//! Built without smoltcp's `alloc` feature, like the xarxa side: the socket set and the
+//! socket buffers are statics, lent to smoltcp by `&'static mut`.
 
 use defmt::info;
-use smoltcp::iface::{Config, Interface, SocketSet};
+use smoltcp::iface::{Config, Interface, SocketSet, SocketStorage};
 use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, HardwareAddress, IpAddress, IpCidr, IpEndpoint, Ipv4Address, Ipv6Address};
 
@@ -82,11 +82,13 @@ pub fn run(mut device: Ethernet<ETH_TX, ETH_RX>) -> ! {
         .add_default_ipv4_route(Ipv4Address::from(GATEWAY))
         .unwrap();
 
-    let net = Net {
-        iface,
-        device,
-        sockets: SocketSet::new(Vec::new()),
-    };
+    // One socket, whichever benchmark is built.
+    static mut SOCKETS: [SocketStorage<'static>; 1] = [SocketStorage::EMPTY; 1];
+    // SAFETY: this runs once, and nothing else names the static.
+    let storage: &'static mut [SocketStorage<'static>] = unsafe { &mut *(&raw mut SOCKETS) };
+    let sockets = SocketSet::new(storage);
+
+    let net = Net { iface, device, sockets };
     info!("{} {}: stack up, talking to {}", STACK, IPV, SERVER_ADDR);
 
     bench(net)
@@ -96,25 +98,38 @@ pub fn run(mut device: Ethernet<ETH_TX, ETH_RX>) -> ! {
 // TCP
 // ---------------------------------------------------------------------------
 
+/// Add the benchmark's one TCP socket, lending it a pair of static ring buffers.
+///
+/// The capacities are [`TCP_RX_CAP`] and [`TCP_TX_CAP`], the same two the xarxa side
+/// uses.
+#[cfg(any(feature = "bench-tcp-tx", feature = "bench-tcp-rx"))]
+fn add_tcp_socket(net: &mut Net) -> smoltcp::iface::SocketHandle {
+    use smoltcp::socket::tcp;
+
+    static mut RX_BUF: [u8; TCP_RX_CAP] = [0; TCP_RX_CAP];
+    static mut TX_BUF: [u8; TCP_TX_CAP] = [0; TCP_TX_CAP];
+
+    // SAFETY: called once, and nothing else names either static.
+    let rx: &'static mut [u8] = unsafe { &mut *(&raw mut RX_BUF) };
+    let tx: &'static mut [u8] = unsafe { &mut *(&raw mut TX_BUF) };
+    let mut socket = tcp::Socket::new(tcp::SocketBuffer::new(rx), tcp::SocketBuffer::new(tx));
+    // Reno on all three stacks: it is what lwIP's TCP implements and cannot be
+    // turned off, and xarxa and smoltcp both default to no congestion control at
+    // all, so both are told to use it.
+    socket.set_congestion_control(tcp::CongestionControl::Reno);
+    net.sockets.add(socket)
+}
+
 /// Open the connection, retrying on the next local port if the server does not answer.
 ///
-/// See the same function in `bench_xarxa.rs` for why the port has to move.
+/// See the same function in `bench_xarxa.rs` for why the port has to move, and why every
+/// attempt reuses the one socket.
 #[cfg(any(feature = "bench-tcp-tx", feature = "bench-tcp-rx"))]
-fn connect(net: &mut Net, port: u16, rx_cap: usize, tx_cap: usize) -> smoltcp::iface::SocketHandle {
+fn connect(net: &mut Net, handle: smoltcp::iface::SocketHandle, port: u16) {
     use embassy_time::{Duration, Instant as HwInstant};
     use smoltcp::socket::tcp;
 
     for local_port in LOCAL_PORT.. {
-        let mut socket = tcp::Socket::new(
-            tcp::SocketBuffer::new(vec![0u8; rx_cap]),
-            tcp::SocketBuffer::new(vec![0u8; tx_cap]),
-        );
-        // Reno on all three stacks: it is what lwIP's TCP implements and cannot be
-        // turned off, and xarxa and smoltcp both default to no congestion control at
-        // all, so both are told to use it.
-        socket.set_congestion_control(tcp::CongestionControl::Reno);
-        let handle = net.sockets.add(socket);
-
         info!(
             "{} {}: connecting to {}:{} from :{}...",
             STACK, DIR, SERVER_ADDR, port, local_port
@@ -131,7 +146,7 @@ fn connect(net: &mut Net, port: u16, rx_cap: usize, tx_cap: usize) -> smoltcp::i
             match net.sockets.get::<tcp::Socket>(handle).state() {
                 tcp::State::Established => {
                     info!("{} {}: connected", STACK, DIR);
-                    return handle;
+                    return;
                 }
                 tcp::State::Closed => break,
                 _ if HwInstant::now() > deadline => break,
@@ -141,7 +156,6 @@ fn connect(net: &mut Net, port: u16, rx_cap: usize, tx_cap: usize) -> smoltcp::i
 
         net.sockets.get_mut::<tcp::Socket>(handle).abort();
         net.poll();
-        net.sockets.remove(handle);
     }
     unreachable!()
 }
@@ -151,7 +165,8 @@ fn connect(net: &mut Net, port: u16, rx_cap: usize, tx_cap: usize) -> smoltcp::i
 fn bench(mut net: Net) -> ! {
     use smoltcp::socket::tcp;
 
-    let handle = connect(&mut net, TCP_UPLOAD_PORT, TCP_BUF_IDLE, TCP_BUF);
+    let handle = add_tcp_socket(&mut net);
+    connect(&mut net, handle, TCP_UPLOAD_PORT);
     let buf = [0x5au8; IO_CHUNK];
     let mut meter = Meter::new();
 
@@ -181,7 +196,8 @@ fn bench(mut net: Net) -> ! {
 fn bench(mut net: Net) -> ! {
     use smoltcp::socket::tcp;
 
-    let handle = connect(&mut net, TCP_DOWNLOAD_PORT, TCP_BUF, TCP_BUF_IDLE);
+    let handle = add_tcp_socket(&mut net);
+    connect(&mut net, handle, TCP_DOWNLOAD_PORT);
     let mut buf = [0u8; IO_CHUNK];
     let mut meter = Meter::new();
 
@@ -220,14 +236,18 @@ fn udp_socket() -> smoltcp::socket::udp::Socket<'static> {
     use smoltcp::socket::udp;
     use smoltcp::storage::PacketMetadata;
 
-    let rx = udp::PacketBuffer::new(
-        vec![PacketMetadata::EMPTY; UDP_RX_PACKETS],
-        vec![0u8; UDP_RX_PACKETS * UDP_PAYLOAD],
-    );
-    let tx = udp::PacketBuffer::new(
-        vec![PacketMetadata::EMPTY; UDP_TX_PACKETS],
-        vec![0u8; UDP_TX_PACKETS * UDP_PAYLOAD],
-    );
+    static mut RX_META: [PacketMetadata<udp::UdpMetadata>; UDP_RX_PACKETS] = [PacketMetadata::EMPTY; UDP_RX_PACKETS];
+    static mut RX_BUF: [u8; UDP_RX_PACKETS * UDP_PAYLOAD] = [0; UDP_RX_PACKETS * UDP_PAYLOAD];
+    static mut TX_META: [PacketMetadata<udp::UdpMetadata>; UDP_TX_PACKETS] = [PacketMetadata::EMPTY; UDP_TX_PACKETS];
+    static mut TX_BUF: [u8; UDP_TX_PACKETS * UDP_PAYLOAD] = [0; UDP_TX_PACKETS * UDP_PAYLOAD];
+
+    // SAFETY: called once, and nothing else names any of the four statics.
+    let rx_meta: &'static mut [PacketMetadata<udp::UdpMetadata>] = unsafe { &mut *(&raw mut RX_META) };
+    let rx_buf: &'static mut [u8] = unsafe { &mut *(&raw mut RX_BUF) };
+    let tx_meta: &'static mut [PacketMetadata<udp::UdpMetadata>] = unsafe { &mut *(&raw mut TX_META) };
+    let tx_buf: &'static mut [u8] = unsafe { &mut *(&raw mut TX_BUF) };
+    let rx = udp::PacketBuffer::new(rx_meta, rx_buf);
+    let tx = udp::PacketBuffer::new(tx_meta, tx_buf);
     udp::Socket::new(rx, tx)
 }
 
