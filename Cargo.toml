@@ -1,3 +1,6 @@
+# For `panic = "immediate-abort"` in the `codesize` profile, at the bottom.
+cargo-features = ["panic-immediate-abort"]
+
 [package]
 name = "xarxa-example-stm32f429zi"
 version = "0.1.0"
@@ -7,108 +10,211 @@ publish = false
 # Standalone: deliberately not a member of any workspace.
 [workspace]
 
-# Three axes, exactly one feature from each. There are no defaults, because there is
-# nothing sensible to run without a choice on all three.
+# Two binaries, selected by feature:
+#
+#  * the throughput benchmark (`src/main.rs`), built by any `bench-*` feature;
+#  * the code-size probe (`src/codesize/main.rs`), built by the `codesize` feature,
+#    which takes any combination of the protocol features below.
+[[bin]]
+name = "xarxa-example-stm32f429zi"
+path = "src/main.rs"
+required-features = ["_bench"]
+
+[[bin]]
+name = "codesize"
+path = "src/codesize/main.rs"
+required-features = ["codesize"]
+
 [features]
 ## the stack under test — only the selected one is compiled at all
 stack-xarxa = ["dep:xarxa"]
 stack-smoltcp = ["dep:smoltcp"]
 stack-lwip = ["dep:lwip-sys"]
 
+# ---------------------------------------------------------------------------
+# Protocol features, mirroring xarxa's own feature list, one for one. Each
+# enables the xarxa feature of the same name, plus the closest equivalent in
+# smoltcp and lwIP when one exists (the `?/` syntax only takes effect for the
+# stack the build selects). A feature with no equivalent in a stack is simply
+# absent from that stack's list — the comparison then shows what the capability
+# costs on the stacks that have it.
+#
+# The throughput benchmarks enable a fixed set of these (`_bench` below); the
+# code-size probe takes any combination.
+# ---------------------------------------------------------------------------
+
+## Ethernet interfaces. Always required here: the board's one interface is Ethernet,
+## and lwIP is built with LWIP_ETHERNET either way.
+medium-ethernet = ["xarxa?/medium-ethernet", "smoltcp?/medium-ethernet"]
+## Bare-IP interfaces. No lwIP equivalent is enabled: its netif is medium-agnostic.
+medium-ip = ["xarxa?/medium-ip", "smoltcp?/medium-ip"]
+## IEEE 802.15.4 + 6LoWPAN interfaces. Not applicable to lwIP (its lowpan6 netif is
+## not part of this vendored build).
+medium-ieee802154 = [
+    "ipv6",
+    "xarxa?/medium-ieee802154",
+    "smoltcp?/medium-ieee802154",
+    "smoltcp?/proto-sixlowpan",
+]
+sixlowpan-fragmentation = [
+    "medium-ieee802154",
+    "xarxa?/sixlowpan-fragmentation",
+    "smoltcp?/proto-sixlowpan-fragmentation",
+]
+sixlowpan-reassembly = [
+    "medium-ieee802154",
+    "xarxa?/sixlowpan-reassembly",
+    # smoltcp's one fragmentation feature covers both directions.
+    "smoltcp?/proto-sixlowpan-fragmentation",
+]
+ipv4 = ["xarxa?/ipv4", "smoltcp?/proto-ipv4", "lwip-sys?/ipv4"]
+# smoltcp's one fragmentation feature covers both directions, so it hangs off both.
+ipv4-fragmentation = [
+    "ipv4",
+    "xarxa?/ipv4-fragmentation",
+    "smoltcp?/proto-ipv4-fragmentation",
+    "lwip-sys?/ipv4-fragmentation",
+]
+ipv4-reassembly = [
+    "ipv4",
+    "xarxa?/ipv4-reassembly",
+    "smoltcp?/proto-ipv4-fragmentation",
+    "lwip-sys?/ipv4-reassembly",
+]
+ipv6 = ["xarxa?/ipv6", "smoltcp?/proto-ipv6", "lwip-sys?/ipv6"]
+udp = ["xarxa?/udp", "smoltcp?/socket-udp", "lwip-sys?/udp"]
+tcp = ["xarxa?/tcp", "smoltcp?/socket-tcp", "lwip-sys?/tcp"]
+## xarxa's listener is its own socket type behind its own feature; on the other two,
+## listening is part of TCP itself, so this adds nothing there.
+tcp-listener = ["tcp", "xarxa?/tcp-listener"]
+## Ethernet-frame raw sockets: xarxa only, the other two have no such socket.
+raw-ethernet = ["medium-ethernet", "xarxa?/raw-ethernet"]
+raw-ip = ["xarxa?/raw-ip", "smoltcp?/socket-raw", "lwip-sys?/raw"]
+dhcpv4 = [
+    "ipv4",
+    "medium-ethernet",
+    "xarxa?/dhcpv4",
+    "smoltcp?/socket-dhcpv4",
+    "lwip-sys?/dhcp",
+]
+## Reading raw options out of the DHCP lease: xarxa only.
+dhcpv4-options = ["dhcpv4", "xarxa?/dhcpv4-options"]
+## A hostname, sent to the DHCP server. smoltcp's DHCP cannot send one.
+hostname = ["xarxa?/hostname", "lwip-sys?/hostname"]
+slaac = ["ipv6", "xarxa?/slaac", "smoltcp?/proto-ipv6-slaac", "lwip-sys?/slaac"]
+dns = ["udp", "xarxa?/dns", "smoltcp?/socket-dns", "lwip-sys?/dns"]
+mdns = ["dns", "xarxa?/mdns", "smoltcp?/socket-mdns", "lwip-sys?/mdns"]
+multicast = ["xarxa?/multicast", "smoltcp?/multicast", "lwip-sys?/multicast"]
+## TCP timestamps: no smoltcp equivalent.
+tcp-timestamps = ["tcp", "xarxa?/tcp-timestamps", "lwip-sys?/tcp-timestamps"]
+## Sending SACK ranges: no smoltcp equivalent.
+tcp-sack = ["tcp", "xarxa?/tcp-sack", "lwip-sys?/tcp-sack"]
+## Congestion control. lwIP's TCP is always Reno (RFC 5681) and has no CUBIC, so
+## neither feature changes its build.
+tcp-reno = ["tcp", "xarxa?/tcp-reno", "smoltcp?/socket-tcp-reno"]
+tcp-cubic = ["tcp", "xarxa?/tcp-cubic", "smoltcp?/socket-tcp-cubic"]
+## Answering pings. lwIP's ICMP cannot be split that fine: it answers pings whenever
+## its ICMP is on, which `ipv4`/`ipv6` turn on (its error generation lives there too).
+icmp-ping-reply = ["xarxa?/icmp-ping-reply", "smoltcp?/auto-icmp-echo-reply"]
+## Delivering incoming ICMP errors to the erring socket: xarxa only.
+icmp-errors = ["xarxa?/icmp-errors"]
+## SO_BINDTODEVICE: xarxa only.
+iface-bind = ["xarxa?/iface-bind"]
+packetmeta-id = ["xarxa?/packetmeta-id", "smoltcp?/packetmeta-id"]
+## Hardware RX/TX timestamps on packets: xarxa only.
+packetmeta-timestamp = ["packetmeta-id", "xarxa?/packetmeta-timestamp"]
+## Waker registration on sockets: xarxa and smoltcp; lwIP's API is callbacks.
+async = ["xarxa?/async", "smoltcp?/async"]
+
+# ---------------------------------------------------------------------------
+# The throughput benchmarks. Every one builds the same full protocol set
+# (`_bench`), so that all matrix cells run the same firmware feature-wise; the
+# `bench-ipv4`/`bench-ipv6` axis picks only which of the server's two addresses
+# the traffic goes to.
+# ---------------------------------------------------------------------------
+
 ## board -> server, TCP (perf-server's "upload", port 4322)
-bench-tcp-tx = []
+bench-tcp-tx = ["_bench"]
 ## server -> board, TCP (perf-server's "download", port 4321)
-bench-tcp-rx = []
+bench-tcp-rx = ["_bench"]
 ## board -> server, UDP (perf-server's "udp upload", port 4325)
-bench-udp-tx = []
+bench-udp-tx = ["_bench"]
 ## server -> board, UDP (perf-server's "udp download", port 4324)
-bench-udp-rx = []
+bench-udp-rx = ["_bench"]
 
-## Which IP version the benchmark's traffic runs over. This selects the *server address*
-## the benchmark talks to and the header sizes derived from it — not what the stacks are
-## built with: both stacks are compiled with IPv4 and IPv6 support either way, and the
-## board configures an address of each family either way, so the two builds differ only
-## in the traffic they generate.
-ipv4 = []
-ipv6 = []
+## Which IP version the benchmark's traffic runs over. This selects the *server
+## address* the benchmark talks to and the header sizes derived from it — not what
+## the stacks are built with: `_bench` compiles both families either way, and the
+## board configures an address of each family either way, so the two builds differ
+## only in the traffic they generate.
+bench-ipv4 = []
+bench-ipv6 = []
 
-[dependencies]
-xarxa = { path = "..", default-features = false, optional = true, features = [
-    "defmt",
-    # No `alloc`: there is no allocator in this firmware at all, on any of the three
-    # stacks. Frames come from xarxa's static packet pool (DESIGN.md §3), sized to hold
-    # a whole window in each direction (2 x ETH_RING) with room to spare, and everything
-    # else the stack keeps is bounded by the knobs below. The TCP ring buffers and the
-    # ethernet driver are lent to the stack as `&'static mut` (DESIGN.md §3 "Lent
-    # storage") from statics in `bench_xarxa.rs` and `main.rs`.
-    "packet-buf-count-64",
-    # Sized like smoltcp's own defaults, which is what the smoltcp build below gets:
-    # 2 routes and 8 neighbor entries. Addresses are 3 rather than 2 because xarxa
-    # configures an IPv6 link-local address of its own when the interface is added,
-    # on top of the IPv4 and IPv6 addresses the benchmark assigns.
-    "iface-count-1",
-    "iface-addr-count-3",
-    "route-count-2",
-    "neighbor-cache-count-8",
-    # One socket of each kind, which is all any benchmark opens.
-    "udp-socket-count-1",
-    "raw-socket-count-1",
-    "tcp-socket-count-1",
-    # The UDP receive queue, the one buffer count the three stacks share: `UDP_RX_PACKETS`
-    # in `src/bench.rs`. Keep the two in step.
-    "udp-rx-queue-count-32",
+# What every throughput benchmark is built with. The protocol set is the one the
+# original benchmark always used (both IP families, all three socket kinds, Reno —
+# the one algorithm lwIP has — and ping replies, everything else off), plus the
+# sizing knobs:
+#  * `packet-buf-count-64`: frames come from xarxa's static packet pool, sized to
+#    hold a whole TCP window in each direction (2 x ETH_RING) with room to spare.
+#  * iface/route/neighbor counts sized like smoltcp's own defaults, which is what
+#    the smoltcp build gets. Addresses are 3 rather than 2 because xarxa configures
+#    an IPv6 link-local address of its own on top of the two the benchmark assigns.
+#  * one socket of each kind, which is all any benchmark opens.
+#  * `udp-rx-queue-count-32`: the one buffer count the three stacks share —
+#    `UDP_RX_PACKETS` in `src/bench.rs`. Keep the two in step.
+_bench = [
     "medium-ethernet",
     "medium-ip",
     "ipv4",
     "ipv6",
-    "raw",
     "udp",
     "tcp",
-    # Reno only: lwIP's TCP is RFC 5681 (slow start, congestion avoidance, fast
-    # retransmit and fast recovery) and has no CUBIC, so compiling CUBIC into the
-    # other two would be code size neither of them can use here.
+    "raw-ethernet",
+    "raw-ip",
     "tcp-reno",
-    # lwIP answers pings (LWIP_ICMP=1) and so does smoltcp here, so xarxa does too.
     "icmp-ping-reply",
-    # `icmp-errors` is deliberately *off*: reporting an incoming ICMP error to
-    # the socket that provoked it is a capability neither lwIP nor smoltcp has, so
-    # compiling it in would put code in one bar of the chart that the other two have no
-    # counterpart for.
-] }
+    "xarxa?/packet-buf-count-64",
+    "xarxa?/iface-count-1",
+    "xarxa?/iface-addr-count-3",
+    "xarxa?/route-count-2",
+    "xarxa?/neighbor-cache-count-8",
+    "xarxa?/udp-socket-count-1",
+    "xarxa?/raw-socket-count-1",
+    "xarxa?/tcp-socket-count-1",
+    "xarxa?/udp-rx-queue-count-32",
+]
 
-# Cut down to the protocols xarxa actually implements, so the comparison is between two
-# stacks doing the same job:
+# ---------------------------------------------------------------------------
+# The code-size probe: `codesize.py` builds `--features stack-X,codesize,<any
+# protocol features>` for each stack and compares the flash footprints. xarxa's
+# sizing knobs are left at their defaults, except two:
 #
-#  * in:  ethernet + IP media, IPv4, IPv6, UDP/TCP/raw sockets, the stack answering
-#         pings itself, Reno congestion control (what lwIP's TCP implements, and
-#         what all three are set to at runtime), a 4-segment TCP assembler.
-#  * out: DHCP, DNS/mDNS, ICMP sockets, IPv4/IPv6/6LoWPAN fragmentation, 6LoWPAN and
-#         802.15.4, RPL, IPsec, SLAAC, IPv6 hop-by-hop/routing headers, IGMP/MLD group
-#         management, packet metadata IDs, and the async/waker plumbing — xarxa has
-#         none of those (§10 of DESIGN.md lists most of them as later features).
-#
-# Everything not named here is left at smoltcp's default, which for the sizing knobs
-# already matches what this example uses (2 addresses, 2 routes, 8 neighbor entries).
-# `alloc` is deliberately off, like xarxa's: smoltcp's socket set and socket buffers are
-# statics in `bench_smoltcp.rs`, so this firmware has no allocator either.
+#  * the address table, which has to fit static v4+v6+link-local addresses plus
+#    what SLAAC learns;
+#  * the interface count, pinned to 1 like `_bench` does. smoltcp's `Interface`
+#    *is* one interface, so xarxa's default of 2 would have it compile real
+#    loops over an interface table where smoltcp compiles none — worth ~600
+#    bytes, and nothing to do with the protocol features under measurement.
+# ---------------------------------------------------------------------------
+codesize = ["xarxa?/iface-addr-count-8", "xarxa?/iface-count-1"]
+
+[dependencies]
+# No `alloc` on any stack: there is no allocator in this firmware at all. Everything
+# beyond the fixed features below — protocols, sockets, sizing — comes in through the
+# feature forwarding above.
+xarxa = { path = "..", default-features = false, optional = true, features = ["defmt"] }
+
+# `icmp-errors`-style capabilities that only one stack has are deliberately per-feature
+# now: enable a feature and each stack gets its own equivalent, or nothing if it has
+# none. The assembler knob matches xarxa's default of 4.
 smoltcp = { version = "0.13", default-features = false, optional = true, features = [
     "defmt",
-    "medium-ethernet",
-    "medium-ip",
-    "proto-ipv4",
-    "proto-ipv6",
-    "socket-raw",
-    "socket-udp",
-    "socket-tcp",
-    "socket-tcp-reno",
-    "auto-icmp-echo-reply",
     "assembler-max-segment-count-4",
 ] }
 
-# lwIP 2.2.1, vendored and compiled from source. The same cutting-down applies as to
-# smoltcp above, but it is expressed in C: see `lwip-sys/port/lwipopts.h`, which turns
-# off DHCP, DNS, autoip, IGMP/MLD, SLAAC, fragmentation, reassembly and the netconn and
-# socket APIs, and sets the buffer sizes to the ones in `src/bench.rs`.
+# lwIP 2.2.1, vendored and compiled from source. Its LWIP_* options follow this
+# crate's protocol features (see `lwip-sys/build.rs`); the sizes are fixed in
+# `lwip-sys/port/lwipopts.h` to the ones in `src/bench.rs`.
 lwip-sys = { path = "lwip-sys", optional = true }
 
 embassy-stm32 = { path = "../../embassy/embassy-stm32", features = [
@@ -141,9 +247,25 @@ defmt-rtt = "1.0.0"
 # would put a Rust-only tax on two of the three bars in the code-size chart.
 panic-probe = "1.0.0"
 
+# embassy-stm32's ethernet driver speaks xarxa, so it depends on `xarxa-driver` from
+# git. Point that at the local checkout: with two copies of the crate in the graph the
+# fat-LTO link fails on their identical defmt symbols, and the benchmark is about the
+# local stack anyway.
+[patch."https://github.com/embassy-rs/xarxa"]
+xarxa-driver = { path = "../xarxa-driver" }
+
 [profile.release]
 codegen-units = 1
 debug = 2
 lto = "fat"
 opt-level = "s"
 overflow-checks = false
+
+# The code-size probe's profile, used by `codesize.py` together with
+# `-Zbuild-std=core`, so that core is compiled with the same settings as the rest
+# of the firmware instead of coming precompiled. Panics abort right away: no
+# panic messages, no `Location`s, no formatting. That applies to all three stacks
+# alike, and removes a Rust-only cost that isn't what the chart is measuring.
+[profile.codesize]
+inherits = "release"
+panic = "immediate-abort"

@@ -2,11 +2,11 @@
 //!
 //! `main` brings up the clocks and the ethernet driver, and then hands the device to
 //! [`bench`], which builds the stack the cargo features asked for and runs the benchmark
-//! the cargo features asked for. Two axes, one feature each, no defaults:
+//! the cargo features asked for. Three axes, one feature each, no defaults:
 //!
 //! ```sh
-//! cargo run --release --features stack-xarxa,bench-tcp-rx
-//! cargo run --release --features stack-smoltcp,bench-udp-tx
+//! cargo run --release --features stack-xarxa,bench-tcp-rx,bench-ipv4
+//! cargo run --release --features stack-smoltcp,bench-udp-tx,bench-ipv6
 //! ```
 //!
 //! The other end is embassy's `perf-server` (`embassy/tests/perf-server`, deployed with

@@ -18,17 +18,26 @@ extern "C" {
 const ip_addr_t *lwipx_ip_any_type(void);
 
 /** Build an `ip_addr_t` (a tagged union) from its bytes, in either family. */
+#if LWIP_IPV4
 void lwipx_ip4(ip_addr_t *out, const u8_t bytes[4]);
+#endif
+#if LWIP_IPV6
 void lwipx_ip6(ip_addr_t *out, const u8_t bytes[16]);
+#endif
 
+#if LWIP_IPV4
 /** `netif_set_addr` over plain bytes: address, netmask and gateway at once. */
 void lwipx_netif_set_ip4(struct netif *netif, const u8_t addr[4], const u8_t netmask[4],
                          const u8_t gw[4]);
+#endif
 
+#if LWIP_IPV6
 /** Add a static IPv6 address to a netif, already valid (no duplicate address detection,
  * matching the other two stacks). Returns lwIP's error code. */
 err_t lwipx_netif_add_ip6(struct netif *netif, const u8_t bytes[16]);
+#endif
 
+#if LWIP_TCP
 /** `tcp_sndbuf`: how much more the send buffer accepts right now. */
 u16_t lwipx_tcp_sndbuf(const struct tcp_pcb *pcb);
 
@@ -37,6 +46,7 @@ u16_t lwipx_tcp_mss(const struct tcp_pcb *pcb);
 
 /** `tcp_nagle_disable`: set TF_NODELAY. */
 void lwipx_tcp_nagle_disable(struct tcp_pcb *pcb);
+#endif
 
 #ifdef __cplusplus
 }

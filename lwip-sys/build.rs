@@ -8,6 +8,42 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs};
 
+/// Whether a cargo feature of this crate is enabled.
+fn feature(name: &str) -> bool {
+    env::var(format!("CARGO_FEATURE_{}", name.replace('-', "_").to_uppercase())).is_ok()
+}
+
+/// The LWIP_* options driven by cargo features. Everything not in this list is fixed in
+/// `port/lwipopts.h`.
+///
+/// Every option is always defined, as 0 or 1, so `lwipopts.h` never has to guess which
+/// ones the build script set. IGMP and MLD are one `multicast` feature split per IP
+/// version here, because each only exists in its own family.
+fn options() -> Vec<(&'static str, bool)> {
+    vec![
+        ("LWIP_IPV4", feature("ipv4")),
+        ("LWIP_ARP", feature("ipv4")),
+        ("LWIP_ICMP", feature("ipv4")),
+        ("LWIP_IPV6", feature("ipv6")),
+        ("LWIP_ICMP6", feature("ipv6")),
+        ("LWIP_UDP", feature("udp")),
+        ("LWIP_TCP", feature("tcp")),
+        ("LWIP_RAW", feature("raw")),
+        ("LWIP_DHCP", feature("dhcp")),
+        ("LWIP_DNS", feature("dns")),
+        ("LWIP_DNS_SUPPORT_MDNS_QUERIES", feature("mdns")),
+        ("LWIP_IGMP", feature("multicast") && feature("ipv4")),
+        ("LWIP_IPV6_MLD", feature("multicast") && feature("ipv6")),
+        ("LWIP_IPV6_AUTOCONFIG", feature("slaac")),
+        ("LWIP_IPV6_SEND_ROUTER_SOLICIT", feature("slaac")),
+        ("LWIP_NETIF_HOSTNAME", feature("hostname")),
+        ("IP_FRAG", feature("ipv4-fragmentation")),
+        ("IP_REASSEMBLY", feature("ipv4-reassembly")),
+        ("LWIP_TCP_SACK_OUT", feature("tcp-sack")),
+        ("LWIP_TCP_TIMESTAMPS", feature("tcp-timestamps")),
+    ]
+}
+
 fn main() {
     let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -45,6 +81,9 @@ fn main() {
     if !cfg!(feature = "assert") {
         build.define("LWIP_NOASSERT", "1");
     }
+    for (name, on) in options() {
+        build.define(name, if on { "1" } else { "0" });
+    }
     build.compile("lwip");
 
     // bindgen parses the same headers with clang, so it needs the toolchain's own
@@ -62,6 +101,9 @@ fn main() {
         .layout_tests(false)
         .derive_default(true)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
+    for (name, on) in options() {
+        bindings = bindings.clang_arg(format!("-D{}={}", name, if on { 1 } else { 0 }));
+    }
     if let Some(sysroot) = sysroot(&build) {
         bindings = bindings.clang_arg(format!("--sysroot={}", sysroot.display()));
     }

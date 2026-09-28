@@ -14,6 +14,28 @@ description = "lwIP 2.2.1, built for thumbv7em-none-eabihf, for the xarxa benchm
 # debug_assert!, no overflow checks).
 assert = []
 
+# Protocol features. Each one turns on the corresponding LWIP_* option — the
+# mapping lives in build.rs, which defines every option as 0 or 1 on the compiler
+# command line (and hands bindgen the same defines, so the bindings match the
+# code). The parent crate (`../Cargo.toml`) forwards its own protocol features to
+# these; the dependencies between them are lwIP's own (DHCP and DNS run over
+# lwIP's UDP, whichever sockets the application wants).
+ipv4 = []
+ipv6 = []
+udp = []
+tcp = []
+raw = []
+dhcp = ["ipv4", "udp"]
+dns = ["udp"]
+mdns = ["dns"]
+multicast = []
+slaac = ["ipv6"]
+hostname = []
+ipv4-fragmentation = ["ipv4"]
+ipv4-reassembly = ["ipv4"]
+tcp-sack = ["tcp"]
+tcp-timestamps = ["tcp"]
+
 [dependencies]
 defmt = "1.0.1"
 

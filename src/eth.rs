@@ -1294,11 +1294,22 @@ impl<const TX: usize, const RX: usize> Ethernet<TX, RX> {
             // The IP MTU, i.e. the frame less its ethernet header — the same 1500 the
             // other two stacks are told, and what lwIP derives the IPv6 MSS from.
             (*netif).mtu = (MTU - 14) as u16;
-            (*netif).mtu6 = (MTU - 14) as u16;
+            #[cfg(feature = "ipv6")]
+            {
+                (*netif).mtu6 = (MTU - 14) as u16;
+            }
             (*netif).flags =
                 (lwip_sys::NETIF_FLAG_BROADCAST | lwip_sys::NETIF_FLAG_ETHARP | lwip_sys::NETIF_FLAG_ETHERNET) as u8;
-            (*netif).output = Some(lwip_sys::etharp_output);
-            (*netif).output_ip6 = Some(lwip_sys::ethip6_output);
+            // The per-family output callbacks (the fields only exist for the families
+            // the build has).
+            #[cfg(feature = "ipv4")]
+            {
+                (*netif).output = Some(lwip_sys::etharp_output);
+            }
+            #[cfg(feature = "ipv6")]
+            {
+                (*netif).output_ip6 = Some(lwip_sys::ethip6_output);
+            }
             (*netif).linkoutput = Some(Self::linkoutput);
         }
         lwip_sys::err_enum_t_ERR_OK as lwip_sys::err_t

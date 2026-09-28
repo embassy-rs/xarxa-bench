@@ -9,11 +9,8 @@
     .axis { stroke: #0b0b0b; stroke-opacity: 0.28; stroke-width: 1; }
     
 .s0 { fill: #2874d8; }
-.s1 { fill: #7eace8; }
-.s2 { fill: #dc4834; }
-.s3 { fill: #ec9a8f; }
-.s4 { fill: #1d8a5c; }
-.s5 { fill: #83c9ac; }
+.s1 { fill: #dc4834; }
+.s2 { fill: #1d8a5c; }
 
     @media (prefers-color-scheme: dark) {
       .surface { fill: #1a1a19; }
@@ -23,88 +20,57 @@
       .axis { stroke: #ffffff; stroke-opacity: 0.32; }
     
 .s0 { fill: #2858d0; }
-.s1 { fill: #7392e0; }
-.s2 { fill: #ac3420; }
-.s3 { fill: #c97b6e; }
-.s4 { fill: #137048; }
-.s5 { fill: #5fa98c; }
+.s1 { fill: #ac3420; }
+.s2 { fill: #137048; }
 }
 </style>
 <rect width="1120" height="520" class="surface"/>
-<text x="64" y="34" class="t1" font-size="19" font-weight="600">Firmware flash footprint</text>
-<text x="64" y="55" class="t2" font-size="13">whole image: stack + ethernet driver + benchmark, .text + .rodata + .data initializers</text>
+<text x="64" y="34" class="t1" font-size="19" font-weight="600">Firmware flash footprint, by feature set</text>
+<text x="64" y="55" class="t2" font-size="13">whole image: stack + ethernet driver + probe, .text + .rodata + .data initializers</text>
 <rect x="64" y="69" width="10" height="10" rx="2" class="s0"/>
-<text x="79" y="78" class="t2" font-size="12">xarxa v4</text>
-<rect x="159.6" y="69" width="10" height="10" rx="2" class="s1"/>
-<text x="174.6" y="78" class="t2" font-size="12">xarxa v6</text>
-<rect x="255.2" y="69" width="10" height="10" rx="2" class="s2"/>
-<text x="270.2" y="78" class="t2" font-size="12">smoltcp v4</text>
-<rect x="365.2" y="69" width="10" height="10" rx="2" class="s3"/>
-<text x="380.2" y="78" class="t2" font-size="12">smoltcp v6</text>
-<rect x="475.2" y="69" width="10" height="10" rx="2" class="s4"/>
-<text x="490.2" y="78" class="t2" font-size="12">lwip v4</text>
-<rect x="563.6" y="69" width="10" height="10" rx="2" class="s5"/>
-<text x="578.6" y="78" class="t2" font-size="12">lwip v6</text>
+<text x="79" y="78" class="t2" font-size="12">xarxa</text>
+<rect x="138.0" y="69" width="10" height="10" rx="2" class="s1"/>
+<text x="153.0" y="78" class="t2" font-size="12">smoltcp</text>
+<rect x="226.4" y="69" width="10" height="10" rx="2" class="s2"/>
+<text x="241.4" y="78" class="t2" font-size="12">lwip</text>
 <line x1="64" y1="444.0" x2="1096" y2="444.0" class="grid"/>
 <text x="54" y="448.0" class="t2" font-size="11" text-anchor="end">0</text>
-<line x1="64" y1="328.0" x2="1096" y2="328.0" class="grid"/>
-<text x="54" y="332.0" class="t2" font-size="11" text-anchor="end">20</text>
-<line x1="64" y1="212.0" x2="1096" y2="212.0" class="grid"/>
-<text x="54" y="216.0" class="t2" font-size="11" text-anchor="end">40</text>
+<line x1="64" y1="357.0" x2="1096" y2="357.0" class="grid"/>
+<text x="54" y="361.0" class="t2" font-size="11" text-anchor="end">20</text>
+<line x1="64" y1="270.0" x2="1096" y2="270.0" class="grid"/>
+<text x="54" y="274.0" class="t2" font-size="11" text-anchor="end">40</text>
+<line x1="64" y1="183.0" x2="1096" y2="183.0" class="grid"/>
+<text x="54" y="187.0" class="t2" font-size="11" text-anchor="end">60</text>
 <line x1="64" y1="96.0" x2="1096" y2="96.0" class="grid"/>
-<text x="54" y="100.0" class="t2" font-size="11" text-anchor="end">60</text>
+<text x="54" y="100.0" class="t2" font-size="11" text-anchor="end">80</text>
 <line x1="64" y1="444.0" x2="1096" y2="444.0" class="axis"/>
 <text x="18" y="270.0" class="t2" font-size="12" text-anchor="middle" transform="rotate(-90 18 270.0)">KiB</text>
-<path d="M95.0 444.0 v-234.4 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v234.4 z" class="s0"/>
-<text x="110.3" y="198.6" class="t1" font-size="11" text-anchor="middle">41.1</text>
-<path d="M127.6 444.0 v-236.2 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.2 z" class="s1"/>
-<text x="143.0" y="196.8" class="t1" font-size="11" text-anchor="middle">41.4</text>
-<path d="M160.3 444.0 v-290.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.8 z" class="s2"/>
-<text x="175.7" y="142.2" class="t1" font-size="11" text-anchor="middle">50.8</text>
-<path d="M193.0 444.0 v-292.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v292.7 z" class="s3"/>
-<text x="208.3" y="140.3" class="t1" font-size="11" text-anchor="middle">51.2</text>
-<path d="M225.7 444.0 v-237.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.0 z" class="s4"/>
-<text x="241.0" y="196.0" class="t1" font-size="11" text-anchor="middle">41.6</text>
-<path d="M258.4 444.0 v-237.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.1 z" class="s5"/>
-<text x="273.7" y="195.9" class="t1" font-size="11" text-anchor="middle">41.6</text>
-<text x="193.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-rx</text>
-<path d="M353.0 444.0 v-234.1 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v234.1 z" class="s0"/>
-<text x="368.3" y="198.9" class="t1" font-size="11" text-anchor="middle">41.1</text>
-<path d="M385.6 444.0 v-236.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.0 z" class="s1"/>
-<text x="401.0" y="197.0" class="t1" font-size="11" text-anchor="middle">41.4</text>
-<path d="M418.3 444.0 v-290.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v290.6 z" class="s2"/>
-<text x="433.7" y="142.4" class="t1" font-size="11" text-anchor="middle">50.8</text>
-<path d="M451.0 444.0 v-292.6 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v292.6 z" class="s3"/>
-<text x="466.3" y="140.4" class="t1" font-size="11" text-anchor="middle">51.1</text>
-<path d="M483.7 444.0 v-236.9 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v236.9 z" class="s4"/>
-<text x="499.0" y="196.1" class="t1" font-size="11" text-anchor="middle">41.5</text>
-<path d="M516.4 444.0 v-237.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.3 z" class="s5"/>
-<text x="531.7" y="195.7" class="t1" font-size="11" text-anchor="middle">41.6</text>
-<text x="451.0" y="466" class="t1" font-size="13" text-anchor="middle">udp-tx</text>
-<path d="M611.0 444.0 v-232.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v232.0 z" class="s0"/>
-<text x="626.3" y="201.0" class="t1" font-size="11" text-anchor="middle">40.7</text>
-<path d="M643.6 444.0 v-233.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v233.7 z" class="s1"/>
-<text x="659.0" y="199.3" class="t1" font-size="11" text-anchor="middle">41.0</text>
-<path d="M676.3 444.0 v-282.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v282.5 z" class="s2"/>
-<text x="691.7" y="150.5" class="t1" font-size="11" text-anchor="middle">49.4</text>
-<path d="M709.0 444.0 v-284.5 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v284.5 z" class="s3"/>
-<text x="724.3" y="148.5" class="t1" font-size="11" text-anchor="middle">49.7</text>
-<path d="M741.7 444.0 v-237.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v237.7 z" class="s4"/>
-<text x="757.0" y="195.3" class="t1" font-size="11" text-anchor="middle">41.7</text>
-<path d="M774.4 444.0 v-238.0 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v238.0 z" class="s5"/>
-<text x="789.7" y="195.0" class="t1" font-size="11" text-anchor="middle">41.7</text>
-<text x="709.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-rx</text>
-<path d="M869.0 444.0 v-233.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v233.8 z" class="s0"/>
-<text x="884.3" y="199.2" class="t1" font-size="11" text-anchor="middle">41.0</text>
-<path d="M901.6 444.0 v-235.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v235.7 z" class="s1"/>
-<text x="917.0" y="197.3" class="t1" font-size="11" text-anchor="middle">41.3</text>
-<path d="M934.3 444.0 v-284.9 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v284.9 z" class="s2"/>
-<text x="949.7" y="148.1" class="t1" font-size="11" text-anchor="middle">49.8</text>
-<path d="M967.0 444.0 v-286.8 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v286.8 z" class="s3"/>
-<text x="982.3" y="146.2" class="t1" font-size="11" text-anchor="middle">50.1</text>
-<path d="M999.7 444.0 v-245.3 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v245.3 z" class="s4"/>
-<text x="1015.0" y="187.7" class="t1" font-size="11" text-anchor="middle">43.0</text>
-<path d="M1032.4 444.0 v-245.7 a4 4 0 0 1 4 -4 h22.7 a4 4 0 0 1 4 4 v245.7 z" class="s5"/>
-<text x="1047.7" y="187.3" class="t1" font-size="11" text-anchor="middle">43.1</text>
-<text x="967.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp-tx</text>
+<path d="M95.0 444.0 v-66.5 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v66.5 z" class="s0"/>
+<text x="126.6" y="366.5" class="t1" font-size="11" text-anchor="middle">16.2</text>
+<path d="M160.3 444.0 v-67.6 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v67.6 z" class="s1"/>
+<text x="192.0" y="365.4" class="t1" font-size="11" text-anchor="middle">16.5</text>
+<path d="M225.7 444.0 v-68.3 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v68.3 z" class="s2"/>
+<text x="257.4" y="364.7" class="t1" font-size="11" text-anchor="middle">16.6</text>
+<text x="193.0" y="466" class="t1" font-size="13" text-anchor="middle">bare</text>
+<path d="M353.0 444.0 v-117.1 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v117.1 z" class="s0"/>
+<text x="384.6" y="315.9" class="t1" font-size="11" text-anchor="middle">27.8</text>
+<path d="M418.3 444.0 v-121.7 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v121.7 z" class="s1"/>
+<text x="450.0" y="311.3" class="t1" font-size="11" text-anchor="middle">28.9</text>
+<path d="M483.7 444.0 v-122.3 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v122.3 z" class="s2"/>
+<text x="515.4" y="310.7" class="t1" font-size="11" text-anchor="middle">29.0</text>
+<text x="451.0" y="466" class="t1" font-size="13" text-anchor="middle">tcp</text>
+<path d="M611.0 444.0 v-157.0 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v157.0 z" class="s0"/>
+<text x="642.6" y="276.0" class="t1" font-size="11" text-anchor="middle">37.0</text>
+<path d="M676.3 444.0 v-180.9 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v180.9 z" class="s1"/>
+<text x="708.0" y="252.1" class="t1" font-size="11" text-anchor="middle">42.5</text>
+<path d="M741.7 444.0 v-161.0 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v161.0 z" class="s2"/>
+<text x="773.4" y="272.0" class="t1" font-size="11" text-anchor="middle">37.9</text>
+<text x="709.0" y="466" class="t1" font-size="13" text-anchor="middle">client</text>
+<path d="M869.0 444.0 v-258.3 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v258.3 z" class="s0"/>
+<text x="900.6" y="174.7" class="t1" font-size="11" text-anchor="middle">60.3</text>
+<path d="M934.3 444.0 v-302.6 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v302.6 z" class="s1"/>
+<text x="966.0" y="130.4" class="t1" font-size="11" text-anchor="middle">70.5</text>
+<path d="M999.7 444.0 v-246.9 a4 4 0 0 1 4 -4 h55.4 a4 4 0 0 1 4 4 v246.9 z" class="s2"/>
+<text x="1031.4" y="186.1" class="t1" font-size="11" text-anchor="middle">57.7</text>
+<text x="967.0" y="466" class="t1" font-size="13" text-anchor="middle">full</text>
 </svg>

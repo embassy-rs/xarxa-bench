@@ -1,0 +1,155 @@
+{
+ "lwip/bare": {
+  "features": [
+   "ipv4",
+   "udp"
+  ],
+  "flash": 17016
+ },
+ "lwip/client": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly"
+  ],
+  "flash": 38836
+ },
+ "lwip/full": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly",
+   "ipv6",
+   "slaac",
+   "mdns",
+   "multicast",
+   "ipv4-fragmentation",
+   "raw-ip"
+  ],
+  "flash": 59052
+ },
+ "lwip/tcp": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno"
+  ],
+  "flash": 29736
+ },
+ "smoltcp/bare": {
+  "features": [
+   "ipv4",
+   "udp"
+  ],
+  "flash": 16860
+ },
+ "smoltcp/client": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly"
+  ],
+  "flash": 43520
+ },
+ "smoltcp/full": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly",
+   "ipv6",
+   "slaac",
+   "mdns",
+   "multicast",
+   "ipv4-fragmentation",
+   "raw-ip"
+  ],
+  "flash": 72168
+ },
+ "smoltcp/tcp": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno"
+  ],
+  "flash": 29588
+ },
+ "xarxa/bare": {
+  "features": [
+   "ipv4",
+   "udp"
+  ],
+  "flash": 16596
+ },
+ "xarxa/client": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly"
+  ],
+  "flash": 37908
+ },
+ "xarxa/full": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno",
+   "dhcpv4",
+   "dns",
+   "icmp-ping-reply",
+   "ipv4-reassembly",
+   "ipv6",
+   "slaac",
+   "mdns",
+   "multicast",
+   "ipv4-fragmentation",
+   "raw-ip"
+  ],
+  "flash": 61756
+ },
+ "xarxa/tcp": {
+  "features": [
+   "ipv4",
+   "udp",
+   "tcp",
+   "tcp-listener",
+   "tcp-reno"
+  ],
+  "flash": 28512
+ }
+}

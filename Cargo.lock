@@ -266,12 +266,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
 
 [[package]]
+name = "embassy-crypto"
+version = "0.1.0"
+dependencies = [
+ "defmt 1.1.1",
+ "unitrait",
+]
+
+[[package]]
 name = "embassy-embedded-hal"
 version = "0.6.0"
 dependencies = [
  "defmt 1.1.1",
  "embassy-futures",
- "embassy-hal-internal",
  "embassy-sync",
  "embassy-time",
  "embedded-hal 0.2.7",
@@ -325,6 +332,7 @@ dependencies = [
  "defmt 1.1.1",
  "document-features",
  "dsp-fixedpoint",
+ "embassy-crypto",
  "embassy-embedded-hal",
  "embassy-futures",
  "embassy-hal-internal",
@@ -884,7 +892,7 @@ dependencies = [
 [[package]]
 name = "stm32-metapac"
 version = "21.0.0"
-source = "git+https://github.com/embassy-rs/stm32-data-generated?tag=stm32-data-871bfd30e87c8bed5f66df2819bf5a5fc23f03b5#f115ed4f83dcb29c9c1f2ba0d1b534e31c74c406"
+source = "git+https://github.com/embassy-rs/stm32-data-generated?tag=stm32-data-235d1f87ad2567a4e6fcee4455c0f5a230626607#ccd0c92a2c1ad33212fd538515f0fb5223587b0b"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -969,9 +977,21 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "unitrait"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b66b59b4e118746027256db08772826e9e0765e93b0bf15d2714a0ac0f940fbe"
+version = "2.0.0"
+source = "git+https://github.com/embassy-rs/unitrait?rev=bb96601b3d293fa27d1ca2891f6ea148e534e433#bb96601b3d293fa27d1ca2891f6ea148e534e433"
+dependencies = [
+ "unitrait-macros",
+]
+
+[[package]]
+name = "unitrait-macros"
+version = "2.0.0"
+source = "git+https://github.com/embassy-rs/unitrait?rev=bb96601b3d293fa27d1ca2891f6ea148e534e433#bb96601b3d293fa27d1ca2891f6ea148e534e433"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
 
 [[package]]
 name = "vcell"
@@ -1016,9 +1036,9 @@ dependencies = [
 name = "xarxa-driver"
 version = "0.1.0"
 dependencies = [
+ "critical-section",
  "defmt 1.1.1",
  "document-features",
- "portable-atomic",
 ]
 
 [[package]]

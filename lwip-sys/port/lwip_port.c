@@ -5,18 +5,23 @@ const ip_addr_t *lwipx_ip_any_type(void)
   return IP_ANY_TYPE;
 }
 
+#if LWIP_IPV4
 void lwipx_ip4(ip_addr_t *out, const u8_t bytes[4])
 {
   IP_ADDR4(out, bytes[0], bytes[1], bytes[2], bytes[3]);
 }
+#endif
 
+#if LWIP_IPV6
 void lwipx_ip6(ip_addr_t *out, const u8_t bytes[16])
 {
   IP_SET_TYPE(out, IPADDR_TYPE_V6);
   ip_2_ip6(out)->zone = IP6_NO_ZONE;
   MEMCPY(ip_2_ip6(out)->addr, bytes, 16);
 }
+#endif
 
+#if LWIP_IPV4
 void lwipx_netif_set_ip4(struct netif *netif, const u8_t addr[4], const u8_t netmask[4],
                          const u8_t gw[4])
 {
@@ -26,7 +31,9 @@ void lwipx_netif_set_ip4(struct netif *netif, const u8_t addr[4], const u8_t net
   IP4_ADDR(&g, gw[0], gw[1], gw[2], gw[3]);
   netif_set_addr(netif, &a, &m, &g);
 }
+#endif
 
+#if LWIP_IPV6
 err_t lwipx_netif_add_ip6(struct netif *netif, const u8_t bytes[16])
 {
   ip6_addr_t a;
@@ -44,7 +51,9 @@ err_t lwipx_netif_add_ip6(struct netif *netif, const u8_t bytes[16])
   netif_ip6_addr_set_state(netif, idx, IP6_ADDR_PREFERRED);
   return ERR_OK;
 }
+#endif
 
+#if LWIP_TCP
 u16_t lwipx_tcp_sndbuf(const struct tcp_pcb *pcb)
 {
   return tcp_sndbuf(pcb);
@@ -59,3 +68,4 @@ void lwipx_tcp_nagle_disable(struct tcp_pcb *pcb)
 {
   tcp_nagle_disable(pcb);
 }
+#endif

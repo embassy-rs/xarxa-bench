@@ -58,39 +58,27 @@
  * Protocols                                                           *
  * ------------------------------------------------------------------ */
 
-#define LWIP_IPV4 1
-#define LWIP_IPV6 1
-#define LWIP_ETHERNET 1
-#define LWIP_ARP 1
-#define LWIP_ICMP 1
-#define LWIP_ICMP6 1
-#define LWIP_RAW 1
-#define LWIP_UDP 1
-#define LWIP_TCP 1
+/* Which protocols exist is driven by this crate's cargo features: build.rs defines
+ * every feature-driven LWIP_* option as 0 or 1 on the compiler command line (see
+ * `options()` there), so none of them may be defined here. What stays in this file is
+ * what is *never* enabled, plus everything that is not a protocol at all. */
 
-#define LWIP_DHCP 0
+#define LWIP_ETHERNET 1
+
 #define LWIP_AUTOIP 0
-#define LWIP_DNS 0
-#define LWIP_IGMP 0
 #define LWIP_ALTCP 0
-#define LWIP_NETIF_HOSTNAME 0
 #define LWIP_NETIF_LOOPBACK 0
 #define LWIP_STATS 0
 
-/* No fragmentation or reassembly in either family — xarxa has none (DESIGN.md §10) and
- * smoltcp's is switched off too. */
-#define IP_REASSEMBLY 0
-#define IP_FRAG 0
+/* IPv6 fragmentation and reassembly are off — xarxa has neither (DESIGN.md §10). The
+ * IPv4 pair is feature-driven (build.rs). */
 #define LWIP_IPV6_REASS 0
 #define LWIP_IPV6_FRAG 0
 
-/* IPv6 addresses are configured statically, like the other two stacks: no SLAAC, no
- * router solicitations, no DAD, and no multicast group management. Neighbour discovery
- * itself (the part xarxa and smoltcp do implement) stays on. */
-#define LWIP_IPV6_AUTOCONFIG 0
-#define LWIP_IPV6_SEND_ROUTER_SOLICIT 0
+/* No duplicate address detection: static addresses go straight to preferred, matching
+ * the other two stacks. This also applies to SLAAC addresses when the `slaac` feature
+ * turns autoconfiguration on. */
 #define LWIP_IPV6_DUP_DETECT_ATTEMPTS 0
-#define LWIP_IPV6_MLD 0
 
 /* ------------------------------------------------------------------ *
  * TCP                                                                 *
@@ -112,9 +100,8 @@
 #define TCP_SND_QUEUELEN ((4 * TCP_SND_BUF) / TCP_MSS)
 #define MEMP_NUM_TCP_SEG TCP_SND_QUEUELEN
 
-/* No SACK and no window scaling — neither of the other two stacks negotiates either in
- * this benchmark, and a 32 KiB window needs no scale. */
-#define LWIP_TCP_SACK_OUT 0
+/* No window scaling: a 32 KiB window needs no scale. (SACK is feature-driven, see
+ * build.rs.) */
 #define LWIP_WND_SCALE 0
 
 /* ------------------------------------------------------------------ *

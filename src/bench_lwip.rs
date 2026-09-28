@@ -69,7 +69,7 @@ const fn v6_bytes(addr: [u16; 8]) -> [u8; 16] {
     out
 }
 
-/// The perf-server's address, in the family the `ipv4`/`ipv6` feature selected.
+/// The perf-server's address, in the family the `bench-ipv4`/`bench-ipv6` feature selected.
 ///
 /// Built at runtime rather than declared as a constant because `ip_addr_t` is a tagged
 /// union that only C can initialise readably (see `lwip-sys/port/lwip_port.c`).
@@ -77,9 +77,9 @@ fn server_addr() -> ip_addr_t {
     let mut addr = MaybeUninit::<ip_addr_t>::uninit();
     // SAFETY: both shims fully initialise what they are given.
     unsafe {
-        #[cfg(feature = "ipv4")]
+        #[cfg(feature = "bench-ipv4")]
         lwipx_ip4(addr.as_mut_ptr(), SERVER_V4.as_ptr());
-        #[cfg(feature = "ipv6")]
+        #[cfg(feature = "bench-ipv6")]
         lwipx_ip6(addr.as_mut_ptr(), v6_bytes(SERVER_V6).as_ptr());
         addr.assume_init()
     }

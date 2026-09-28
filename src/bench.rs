@@ -3,18 +3,18 @@
 //! Three axes, all cargo features, exactly one of each:
 //!
 //! ```sh
-//! cargo run --release --features stack-xarxa,bench-tcp-rx,ipv4
-//! cargo run --release --features stack-smoltcp,bench-tcp-rx,ipv6
+//! cargo run --release --features stack-xarxa,bench-tcp-rx,bench-ipv4
+//! cargo run --release --features stack-smoltcp,bench-tcp-rx,bench-ipv6
 //! ```
 //!
 //! `tx`/`rx` are from the board's point of view, which is the opposite of the
 //! perf-server's port names (it calls board-rx "download" and board-tx "upload").
 //!
-//! The `ipv4`/`ipv6` axis picks which of the server's two addresses the traffic goes to,
+//! The `bench-ipv4`/`bench-ipv6` axis picks which of the server's two addresses the traffic goes to,
 //! and with it the header sizes the MTU-derived constants below are computed from. It
 //! does *not* change what the stacks are built with: both are compiled with IPv4 and
 //! IPv6 support in either case, and the board configures an address of each family in
-//! either case, so all that differs between an `ipv4` and an `ipv6` run is the traffic.
+//! either case, so all that differs between a `bench-ipv4` and a `bench-ipv6` run is the traffic.
 //!
 //! Each benchmark prints one line per second — the rate over that second, the running
 //! average, and the frames the device refused. After [`WARMUP_SECS`] the averages reset
@@ -87,10 +87,10 @@ compile_error!("enable exactly one of the `bench-{tcp,udp}-{tx,rx}` cargo featur
 ))]
 compile_error!("only one `bench-*` cargo feature can be enabled at a time");
 
-#[cfg(not(any(feature = "ipv4", feature = "ipv6")))]
-compile_error!("enable exactly one of the `ipv4` / `ipv6` cargo features");
-#[cfg(all(feature = "ipv4", feature = "ipv6"))]
-compile_error!("only one of `ipv4` / `ipv6` can be enabled at a time");
+#[cfg(not(any(feature = "bench-ipv4", feature = "bench-ipv6")))]
+compile_error!("enable exactly one of the `bench-ipv4` / `bench-ipv6` cargo features");
+#[cfg(all(feature = "bench-ipv4", feature = "bench-ipv6"))]
+compile_error!("only one of `bench-ipv4` / `bench-ipv6` can be enabled at a time");
 
 #[cfg(feature = "stack-xarxa")]
 #[path = "bench_xarxa.rs"]
@@ -104,7 +104,7 @@ mod imp;
 
 pub use imp::run;
 
-/// The machine running `embassy/tests/perf-server`, on each family — the `ipv4`/`ipv6`
+/// The machine running `embassy/tests/perf-server`, on each family — the `bench-ipv4`/`bench-ipv6`
 /// feature picks which one the benchmark talks to. Both are on-link for the board's own
 /// addresses (see `main.rs`), so no gateway is involved either way.
 pub const SERVER_V4: [u8; 4] = [192, 168, 2, 2];
@@ -138,9 +138,9 @@ pub const TCP_TX_CAP: usize = if cfg!(feature = "bench-tcp-tx") {
 };
 
 /// The selected family's IP header size — 20 bytes for IPv4, 40 for IPv6. Everything
-/// derived from the MTU below goes through this, so an `ipv6` run carries 20 bytes less
-/// payload per frame than an `ipv4` one, exactly as it does on the wire.
-pub const IP_HEADER: usize = if cfg!(feature = "ipv4") { 20 } else { 40 };
+/// derived from the MTU below goes through this, so a `bench-ipv6` run carries 20 bytes less
+/// payload per frame than a `bench-ipv4` one, exactly as it does on the wire.
+pub const IP_HEADER: usize = if cfg!(feature = "bench-ipv4") { 20 } else { 40 };
 
 /// Largest TCP segment either stack will emit or receive: the MTU less the IP and TCP
 /// headers.
@@ -192,7 +192,7 @@ pub const STACK: &str = if cfg!(feature = "stack-xarxa") {
 };
 
 /// Which IP version is under test, for the log lines.
-pub const IPV: &str = if cfg!(feature = "ipv4") { "ipv4" } else { "ipv6" };
+pub const IPV: &str = if cfg!(feature = "bench-ipv4") { "ipv4" } else { "ipv6" };
 
 /// How long the benchmark ignores before it starts measuring: the connection is up by
 /// then, the TCP window has opened, and the server's UDP flood has reached its pace.

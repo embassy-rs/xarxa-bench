@@ -8,14 +8,15 @@
 use defmt::info;
 use xarxa::Stack;
 use xarxa::time::Instant;
-use xarxa::wire::{IpAddress, IpCidr, IpEndpoint, Ipv4Address};
+use xarxa::wire::{IpAddr, IpCidr, Ipv4Addr, SocketAddr};
 
 use super::*;
 use crate::eth::Ethernet;
 use crate::{GATEWAY, IP_ADDR, IP_PREFIX_LEN, IPV6_ADDR, IPV6_PREFIX_LEN, now_micros};
 
 fn now() -> Instant {
-    Instant::from_micros(now_micros())
+    // The low 32 bits of the millisecond count: xarxa's instants wrap around.
+    Instant::from_millis((now_micros() / 1000) as u32)
 }
 
 /// Bring up the stack on the device, then hand over to the selected benchmark.
@@ -28,15 +29,13 @@ pub fn run(device: Ethernet<ETH_TX, ETH_RX>) -> ! {
     // Benchmarks don't care about ISN/port unpredictability; a constant seed
     // keeps runs reproducible. Real firmware should seed from the RNG peripheral.
     let mut stack = Stack::new(0x1234_5678_dead_beef);
-    let iface = stack
-        .add_iface_borrowed(&mut device)
-        .unwrap();
+    let iface = stack.add_iface_borrowed(&mut device).unwrap();
     stack
         .iface(iface)
         .set_ip_addrs([
-            IpCidr::new(IpAddress::Ipv4(Ipv4Address::from(IP_ADDR)), IP_PREFIX_LEN),
+            IpCidr::new(IpAddr::V4(Ipv4Addr::from(IP_ADDR)), IP_PREFIX_LEN),
             IpCidr::new(
-                IpAddress::v6(
+                IpAddr::v6(
                     IPV6_ADDR[0],
                     IPV6_ADDR[1],
                     IPV6_ADDR[2],
@@ -52,18 +51,18 @@ pub fn run(device: Ethernet<ETH_TX, ETH_RX>) -> ! {
         .unwrap();
     stack
         .routes_mut()
-        .add_default_ipv4_route(Ipv4Address::from(GATEWAY), iface)
+        .add_default_ipv4_route(Ipv4Addr::from(GATEWAY), iface)
         .unwrap();
     info!("{} {}: stack up, talking to {}", STACK, IPV, SERVER_ADDR);
 
     bench(&mut stack)
 }
 
-/// The perf-server's address, in the family the `ipv4`/`ipv6` feature selected.
-#[cfg(feature = "ipv4")]
-const SERVER_ADDR: IpAddress = IpAddress::v4(SERVER_V4[0], SERVER_V4[1], SERVER_V4[2], SERVER_V4[3]);
-#[cfg(feature = "ipv6")]
-const SERVER_ADDR: IpAddress = IpAddress::v6(
+/// The perf-server's address, in the family the `bench-ipv4`/`bench-ipv6` feature selected.
+#[cfg(feature = "bench-ipv4")]
+const SERVER_ADDR: IpAddr = IpAddr::v4(SERVER_V4[0], SERVER_V4[1], SERVER_V4[2], SERVER_V4[3]);
+#[cfg(feature = "bench-ipv6")]
+const SERVER_ADDR: IpAddr = IpAddr::v6(
     SERVER_V6[0],
     SERVER_V6[1],
     SERVER_V6[2],
@@ -114,7 +113,7 @@ fn connect(stack: &mut Stack, handle: xarxa::tcp::TcpHandle, port: u16) {
         );
         stack
             .tcp_socket(handle)
-            .connect(IpEndpoint::from((SERVER_ADDR, port)), local_port)
+            .connect(SocketAddr::from((SERVER_ADDR, port)), local_port)
             .unwrap();
 
         let deadline = HwInstant::now() + Duration::from_secs(2);
@@ -210,7 +209,7 @@ fn bench(stack: &mut Stack) -> ! {
     let handle = stack.add_udp_socket().unwrap();
     stack
         .udp_socket(handle)
-        .bind(LOCAL_PORT, IpEndpoint::from((SERVER_ADDR, UDP_UPLOAD_PORT)))
+        .bind(LOCAL_PORT, SocketAddr::from((SERVER_ADDR, UDP_UPLOAD_PORT)))
         .unwrap();
     info!("{} {}: sending to {}:{}", STACK, DIR, SERVER_ADDR, UDP_UPLOAD_PORT);
 
@@ -223,7 +222,7 @@ fn bench(stack: &mut Stack) -> ! {
         let mut socket = stack.udp_socket(handle);
         // A batch per poll, so ingress (ARP, ICMP) still gets serviced promptly.
         for _ in 0..8 {
-            match socket.send_slice(&buf, IpEndpoint::UNSPECIFIED) {
+            match socket.send_slice(&buf, SocketAddr::UNSPECIFIED) {
                 Ok(()) => meter.add(buf.len()),
                 Err(xarxa::udp::SendError::DeviceBusy) => break,
                 Err(e) => defmt::panic!("{} {}: send error: {}", STACK, DIR, e),
@@ -242,7 +241,7 @@ fn bench(stack: &mut Stack) -> ! {
     let handle = stack.add_udp_socket().unwrap();
     stack
         .udp_socket(handle)
-        .bind(LOCAL_PORT, IpEndpoint::from((SERVER_ADDR, UDP_DOWNLOAD_PORT)))
+        .bind(LOCAL_PORT, SocketAddr::from((SERVER_ADDR, UDP_DOWNLOAD_PORT)))
         .unwrap();
     info!(
         "{} {}: subscribing to {}:{}",
@@ -262,7 +261,7 @@ fn bench(stack: &mut Stack) -> ! {
         // The subscription lapses after 2s on the server; renew well inside that.
         if HwInstant::now() >= resubscribe_at {
             resubscribe_at = HwInstant::now() + Duration::from_millis(500);
-            socket.send_slice(&sub, IpEndpoint::UNSPECIFIED).unwrap();
+            socket.send_slice(&sub, SocketAddr::UNSPECIFIED).unwrap();
         }
 
         while let Ok(packet) = socket.recv() {

@@ -19,10 +19,10 @@ fn now() -> Instant {
     Instant::from_micros(now_micros())
 }
 
-/// The perf-server's address, in the family the `ipv4`/`ipv6` feature selected.
-#[cfg(feature = "ipv4")]
+/// The perf-server's address, in the family the `bench-ipv4`/`bench-ipv6` feature selected.
+#[cfg(feature = "bench-ipv4")]
 const SERVER_ADDR: IpAddress = IpAddress::v4(SERVER_V4[0], SERVER_V4[1], SERVER_V4[2], SERVER_V4[3]);
-#[cfg(feature = "ipv6")]
+#[cfg(feature = "bench-ipv6")]
 const SERVER_ADDR: IpAddress = IpAddress::v6(
     SERVER_V6[0],
     SERVER_V6[1],

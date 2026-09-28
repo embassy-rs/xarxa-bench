@@ -11,7 +11,11 @@ fn main() {
         assert!(shift % 4 == 0, "TEXT_SHIFT must be a multiple of 4");
         // 0x0800_01ac is where .text starts otherwise: the end of the F429's vector table.
         let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
-        std::fs::write(out.join("probe.x"), format!("_stext = {:#x};\n", 0x0800_01acu32 + shift)).unwrap();
+        std::fs::write(
+            out.join("probe.x"),
+            format!("_stext = {:#x};\n", 0x0800_01acu32 + shift),
+        )
+        .unwrap();
         println!("cargo:rustc-link-search={}", out.display());
         println!("cargo:rustc-link-arg-bins=-Tprobe.x");
     }
@@ -19,5 +23,4 @@ fn main() {
     println!("cargo:rustc-link-arg-bins=-Tlink.x");
     println!("cargo:rustc-link-arg-bins=-Tdefmt.x");
     println!("cargo:rustc-link-arg-bins=-Tteleprobe.x");
-
 }
