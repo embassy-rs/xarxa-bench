@@ -106,7 +106,7 @@
    "ipv4",
    "udp"
   ],
-  "flash": 16596
+  "flash": 16268
  },
  "xarxa/client": {
   "features": [
@@ -120,7 +120,7 @@
    "icmp-ping-reply",
    "ipv4-reassembly"
   ],
-  "flash": 37908
+  "flash": 34820
  },
  "xarxa/full": {
   "features": [
@@ -140,7 +140,7 @@
    "ipv4-fragmentation",
    "raw-ip"
   ],
-  "flash": 61756
+  "flash": 54996
  },
  "xarxa/tcp": {
   "features": [
@@ -150,6 +150,6 @@
    "tcp-listener",
    "tcp-reno"
   ],
-  "flash": 28512
+  "flash": 26376
  }
 }

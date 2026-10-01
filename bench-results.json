@@ -1,99 +1,83 @@
 {
  "lwip/tcp-rx/ipv4": {
-  "flash": 42832,
-  "mbits": 84.839,
-  "shift": 4
+  "mbits": 84.884,
+  "shift": 0
  },
  "lwip/tcp-rx/ipv6": {
-  "flash": 42888,
-  "mbits": 84.039,
-  "shift": 8
+  "mbits": 84.066,
+  "shift": 4
  },
  "lwip/tcp-tx/ipv4": {
-  "flash": 44176,
-  "mbits": 70.918,
-  "shift": 8
+  "mbits": 70.849,
+  "shift": 0
  },
  "lwip/tcp-tx/ipv6": {
-  "flash": 44252,
-  "mbits": 69.824,
+  "mbits": 69.787,
   "shift": 12
  },
  "lwip/udp-rx/ipv4": {
-  "flash": 42684,
-  "mbits": 95.711,
+  "mbits": 95.709,
   "shift": 4
  },
  "lwip/udp-rx/ipv6": {
-  "flash": 42732,
   "mbits": 94.409,
   "shift": 4
  },
  "lwip/udp-tx/ipv4": {
-  "flash": 42716,
-  "mbits": 82.442,
-  "shift": 0
- },
- "lwip/udp-tx/ipv6": {
-  "flash": 42788,
-  "mbits": 81.835,
-  "shift": 4
- },
- "smoltcp/tcp-rx/ipv4": {
-  "flash": 50460,
-  "mbits": 66.437,
+  "mbits": 82.434,
   "shift": 12
  },
+ "lwip/udp-tx/ipv6": {
+  "mbits": 81.271,
+  "shift": 0
+ },
+ "smoltcp/tcp-rx/ipv4": {
+  "mbits": 66.529,
+  "shift": 8
+ },
  "smoltcp/tcp-rx/ipv6": {
-  "flash": 50800,
-  "mbits": 64.95,
+  "mbits": 65.177,
   "shift": 12
  },
  "smoltcp/tcp-tx/ipv4": {
-  "flash": 50872,
-  "mbits": 66.777,
-  "shift": 4
- },
- "smoltcp/tcp-tx/ipv6": {
-  "flash": 51212,
-  "mbits": 59.827,
-  "shift": 4
- },
- "smoltcp/udp-rx/ipv4": {
-  "flash": 51920,
-  "mbits": 72.995,
+  "mbits": 66.675,
   "shift": 8
  },
+ "smoltcp/tcp-tx/ipv6": {
+  "mbits": 59.726,
+  "shift": 8
+ },
+ "smoltcp/udp-rx/ipv4": {
+  "mbits": 76.995,
+  "shift": 4
+ },
  "smoltcp/udp-rx/ipv6": {
-  "flash": 52260,
-  "mbits": 62.947,
+  "mbits": 67.692,
   "shift": 8
  },
  "smoltcp/udp-tx/ipv4": {
-  "flash": 51900,
-  "mbits": 75.802,
-  "shift": 0
+  "mbits": 75.909,
+  "shift": 12
  },
  "smoltcp/udp-tx/ipv6": {
-  "flash": 52248,
-  "mbits": 64.221,
-  "shift": 8
+  "mbits": 64.592,
+  "shift": 4
  },
  "xarxa/tcp-rx/ipv4": {
-  "mbits": 94.802,
+  "mbits": 94.699,
   "shift": 0
  },
  "xarxa/tcp-rx/ipv6": {
-  "mbits": 93.39,
+  "mbits": 92.968,
   "shift": 12
  },
  "xarxa/tcp-tx/ipv4": {
-  "mbits": 88.45,
-  "shift": 8
+  "mbits": 91.85,
+  "shift": 4
  },
  "xarxa/tcp-tx/ipv6": {
-  "mbits": 85.408,
-  "shift": 8
+  "mbits": 88.622,
+  "shift": 4
  },
  "xarxa/udp-rx/ipv4": {
   "mbits": 95.709,
@@ -104,11 +88,11 @@
   "shift": 0
  },
  "xarxa/udp-tx/ipv4": {
-  "mbits": 93.904,
+  "mbits": 93.909,
   "shift": 0
  },
  "xarxa/udp-tx/ipv6": {
-  "mbits": 92.63,
+  "mbits": 92.632,
   "shift": 12
  }
 }
